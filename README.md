@@ -1,5 +1,11 @@
 # 🎵 Spotify Toolkit
 
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/DarksAces/Spotify-Toolkit?style=for-the-badge&color=1DB954)
+![GitHub Repo stars](https://img.shields.io/github/stars/DarksAces/Spotify-Toolkit?style=for-the-badge&color=white)
+![GitHub license](https://img.shields.io/github/license/DarksAces/Spotify-Toolkit?style=for-the-badge&color=1DB954)
+![Python Version](https://img.shields.io/badge/python-3.9+-yellow?style=for-the-badge&logo=python)
+
+Una colección potente de herramientas con interfaz gráfica para gestionar, limpiar y potenciar tu experiencia en Spotify.
 A comprehensive collection of Python scripts to manage, analyze, and optimize your Spotify library. From cleaning duplicates to generating advanced statistics, this toolkit leverages the Spotify API to give you full control over your playlists and liked songs.
 
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/)
