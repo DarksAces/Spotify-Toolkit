@@ -1,0 +1,55 @@
+name: Build Spotify Toolkit EXE
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller spotipy python-dotenv
+
+    - name: Build EXE with Secrets
+      shell: pwsh
+      env:
+        SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+        SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+        SPOTIFY_REDIRECT_URI: ${{ secrets.SPOTIFY_REDIRECT_URI }}
+      run: |
+        $mainMenu = Get-Content main_gui.py -Raw
+        $mainMenu = $mainMenu -replace 'load_dotenv\(\) # \[CREDENTIALS_MARKER\]', "os.environ['SPOTIFY_CLIENT_ID']='${env:SPOTIFY_CLIENT_ID}'; os.environ['SPOTIFY_CLIENT_SECRET']='${env:SPOTIFY_CLIENT_SECRET}'; os.environ['SPOTIFY_REDIRECT_URI']='${env:SPOTIFY_REDIRECT_URI}'"
+        Set-Content main_gui_build.py $mainMenu
+
+        pyinstaller --noconfirm --onefile --windowed --name "SpotifyToolkit" `
+          --add-data "Delet Duplicates;Delet Duplicates" `
+          --add-data "Extraer Artistas;Extraer Artistas" `
+          --add-data "Reorder;Reorder" `
+          --add-data "Separate Artists;Separate Artists" `
+          --add-data "Separate Genres;Separate Genres" `
+          --add-data "Shufle;Shufle" `
+          --add-data "Time;Time" `
+          --add-data "Top Tracks;Top Tracks" `
+          main_gui_build.py
+
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/SpotifyToolkit.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

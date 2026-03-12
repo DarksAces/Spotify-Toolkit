@@ -2,6 +2,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
 import os
+import sys
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     client_id=os.getenv("SPOTIFY_CLIENT_ID"),
     client_secret=os.getenv("SPOTIFY_CLIENT_SECRET"),
@@ -32,7 +33,7 @@ opcion = input("Tu opción: ")
 
 if opcion not in ["1", "2", "3"]:
     print("Opción no válida. Solo se pueden seleccionar rangos accesibles por la API.")
-    exit()
+    sys.sys.exit()
 
 time_range = {"1": "short_term", "2": "medium_term", "3": "long_term"}[opcion]
 
@@ -45,3 +46,4 @@ for i, t in enumerate(top_tracks, start=1):
     artistas = ", ".join([a['name'] for a in t['artists']])
     release_date = t['album']['release_date']
     print(f"{i}. {t['name']} - {artistas} ({release_date})")
+

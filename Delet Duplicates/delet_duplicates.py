@@ -1,4 +1,5 @@
 import os
+import sys
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from spotipy.exceptions import SpotifyOauthError
@@ -15,7 +16,7 @@ try:
 except SpotifyOauthError as e:
     print(f"\n❌ Error de autenticación: {e}")
     print("Revisa tus credenciales o variables de entorno (CLIENT_ID, CLIENT_SECRET, REDIRECT_URI).")
-    exit()
+    sys.sys.exit()
 
 # ------------------- SELECCIÓN DE FUENTE -------------------
 print("\n¿Dónde quieres buscar duplicados?")
@@ -46,7 +47,7 @@ else:
         playlist_name = playlist["name"]
     except Exception as e:
         print(f"❌ Error al obtener la playlist: {e}")
-        exit()
+        sys.sys.exit()
 
     print(f"\n🔍 Obteniendo canciones de la playlist '{playlist_name}'...")
     offset = 0
@@ -136,3 +137,4 @@ else:
                 print("\n👌 No se hicieron cambios.")
     else:
         print("\n❌ No se eliminó ninguna canción.")
+

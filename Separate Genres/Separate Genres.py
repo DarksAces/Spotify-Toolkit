@@ -1,5 +1,6 @@
 import time
 import os
+import sys
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from requests.exceptions import ReadTimeout
@@ -138,7 +139,7 @@ if __name__ == "__main__":
 
     mode, playlist_id = choose_source(playlists)
     if not mode:
-        exit()
+        sys.sys.exit()
 
     if mode == "liked_songs":
         tracks = get_liked_songs()
@@ -147,7 +148,7 @@ if __name__ == "__main__":
 
     if not tracks:
         print("❌ No se encontraron canciones.")
-        exit()
+        sys.sys.exit()
 
     print("\nIntroduce los géneros a clasificar (separados por comas):")
     genres_to_classify = input("> ").split(',')
@@ -155,7 +156,7 @@ if __name__ == "__main__":
 
     if not genres_to_classify:
         print("❌ No introdujiste ningún género.")
-        exit()
+        sys.sys.exit()
 
     classified = classify_tracks_by_genre(tracks, genres_to_classify)
     print("🎶 Clasificación completada.")
@@ -167,3 +168,4 @@ if __name__ == "__main__":
             print(f"Sin canciones para el género: {genre}")
 
     print("\n✨ Proceso completado con éxito.")
+

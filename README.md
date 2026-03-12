@@ -52,7 +52,7 @@ This repository is configured with **GitHub Actions** to automatically build a s
 1. **Set up Secrets:** In your GitHub repo, go to `Settings > Secrets and variables > Actions` and add:
    - `SPOTIFY_CLIENT_ID`
    - `SPOTIFY_CLIENT_SECRET`
-   - `SPOTIFY_REDIRECT_URI` (typically `http://localhost:8888/callback`)
+   - `SPOTIFY_REDIRECT_URI` (use `http://127.0.0.1:8888/callback`)
 2. **Trigger a build:** Create a new **Release** with a tag like `v1.0.0`.
 3. **Result:** The action will compile the code, inject the secrets securely into the binary, and attach the `SpotifyToolkit.exe` to the release.
 

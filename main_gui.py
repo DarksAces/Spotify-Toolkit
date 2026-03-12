@@ -1,0 +1,185 @@
+import customtkinter as ctk
+import os
+import sys
+import subprocess
+import threading
+import time
+import runpy
+import ctypes
+from PIL import Image
+from dotenv import load_dotenv
+
+def get_base_path():
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.dirname(sys.executable)
+    return os.path.abspath(os.path.dirname(__file__))
+
+def get_resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+# --- SISTEMA DE CREDENCIALES PLUG & PLAY ---
+# En desarrollo local usamos .env. El robot de GitHub reemplazará esta línea por las claves reales.
+load_dotenv() # [CREDENTIALS_MARKER]
+
+def check_credentials():
+    """ Verifica si las claves están presentes en el sistema o inyectadas """
+    return all([os.getenv('SPOTIFY_CLIENT_ID'), os.getenv('SPOTIFY_CLIENT_SECRET'), os.getenv('SPOTIFY_REDIRECT_URI')])
+
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("green")
+
+class SpotifyToolkitApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+
+        self.title("Spotify Toolkit v1.0 - Premium")
+        self.geometry("900x650")
+
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+
+        self.font_title = ctk.CTkFont(family="Inter", size=24, weight="bold")
+        self.font_subtitle = ctk.CTkFont(family="Inter", size=14)
+
+        # Sidebar
+        self.sidebar_frame = ctk.CTkFrame(self, width=200, corner_radius=0)
+        self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
+        self.sidebar_frame.grid_rowconfigure(5, weight=1)
+
+        self.logo_label = ctk.CTkLabel(self.sidebar_frame, text="🎵 Toolkit", font=self.font_title)
+        self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
+
+        self.home_button = ctk.CTkButton(self.sidebar_frame, text="Inicio", command=self.show_home, fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"))
+        self.home_button.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
+
+        self.clean_button = ctk.CTkButton(self.sidebar_frame, text="Limpieza", command=self.show_clean, fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"))
+        self.clean_button.grid(row=2, column=0, padx=20, pady=10, sticky="ew")
+
+        self.organize_button = ctk.CTkButton(self.sidebar_frame, text="Organizar", command=self.show_organize, fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"))
+        self.organize_button.grid(row=3, column=0, padx=20, pady=10, sticky="ew")
+
+        self.stats_button = ctk.CTkButton(self.sidebar_frame, text="Estadísticas", command=self.show_stats, fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"))
+        self.stats_button.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
+
+        # Main Container
+        self.main_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.main_frame.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
+        self.main_frame.grid_columnconfigure(0, weight=1)
+        self.main_frame.grid_rowconfigure(1, weight=1)
+
+        # Log
+        self.log_textbox = ctk.CTkTextbox(self.main_frame, height=250, font=("Consolas", 12))
+        self.log_textbox.grid(row=2, column=0, padx=0, pady=(20, 0), sticky="nsew")
+        
+        if check_credentials():
+            self.add_log("✅ Sistema de Credenciales: CONFIGURADO (Plug & Play Activo)")
+        else:
+            self.add_log("❌ ERROR: No se detectaron credenciales de Spotify.\n⚠️ Si eres el desarrollador, crea un archivo .env.\n⚠️ Si eres un usuario, descarga la versión oficial desde GitHub Releases.")
+
+        self.show_home()
+
+    def add_log(self, text):
+        self.log_textbox.insert("end", text + "\n")
+        self.log_textbox.see("end")
+
+    def run_script_thread(self, script_path):
+        def run():
+            self.state_buttons("disabled")
+            abs_script_path = get_resource_path(script_path)
+            self.add_log(f"\n🚀 Ejecutando: {os.path.basename(script_path)}...")
+            
+            try:
+                env = os.environ.copy()
+                if hasattr(sys, '_MEIPASS'):
+                    env['PYTHONPATH'] = sys._MEIPASS
+                
+                # Sincronizar nombres para spotipy y pasar credenciales inyectadas al hijo
+                env['SPOTIPY_CLIENT_ID'] = os.getenv('SPOTIFY_CLIENT_ID', '')
+                env['SPOTIPY_CLIENT_SECRET'] = os.getenv('SPOTIFY_CLIENT_SECRET', '')
+                env['SPOTIPY_REDIRECT_URI'] = os.getenv('SPOTIFY_REDIRECT_URI', '')
+
+                process = subprocess.Popen(
+                    [sys.executable, "--run", abs_script_path],
+                    env=env,
+                    creationflags=subprocess.CREATE_NEW_CONSOLE
+                )
+                process.wait()
+            except Exception as e:
+                self.add_log(f"❌ Error crítico: {e}")
+            
+            self.add_log(f"✅ Finalizado: {os.path.basename(script_path)}")
+            self.state_buttons("normal")
+
+        threading.Thread(target=run, daemon=True).start()
+
+    def state_buttons(self, state):
+        self.home_button.configure(state=state)
+        self.clean_button.configure(state=state)
+        self.organize_button.configure(state=state)
+        self.stats_button.configure(state=state)
+
+    def clear_main_frame(self):
+        for widget in self.main_frame.winfo_children():
+            if widget != self.log_textbox:
+                widget.destroy()
+
+    # --- Vistas ---
+    def show_home(self):
+        self.clear_main_frame()
+        ctk.CTkLabel(self.main_frame, text="Spotify Toolkit Premium", font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        ctk.CTkLabel(self.main_frame, text="Versión ejecutable autónoma. No requiere configuración adicional.", font=self.font_subtitle).grid(row=1, column=0, sticky="nw")
+
+    def show_clean(self):
+        self.clear_main_frame()
+        ctk.CTkLabel(self.main_frame, text="Limpieza profunda", font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        ctk.CTkButton(self.main_frame, text="Borrar Duplicados", height=45, width=220, command=lambda: self.run_script_thread("Delet Duplicates/delet_duplicates.py")).grid(row=1, column=0, pady=10, sticky="w")
+
+    def show_organize(self):
+        self.clear_main_frame()
+        ctk.CTkLabel(self.main_frame, text="Herramientas de Organización", font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        tools = [
+            ("Separar por Géneros", "Separate Genres/Separate Genres.py"),
+            ("Separar por Artistas", "Separate Artists/Separate Artists.py"),
+            ("Reordenar Playlist", "Reorder/reorder.py"),
+            ("Extraer Artistas", "Extraer Artistas/Extraer Artistas.py"),
+            ("Calculadora Duración", "Time/timer.py")
+        ]
+        for i, (name, path) in enumerate(tools):
+            ctk.CTkButton(self.main_frame, text=name, height=45, width=220, command=lambda p=path: self.run_script_thread(p)).grid(row=i+1, column=0, pady=5, sticky="w")
+
+    def show_stats(self):
+        self.clear_main_frame()
+        ctk.CTkLabel(self.main_frame, text="Análisis de Cuenta", font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        ctk.CTkButton(self.main_frame, text="Top Canciones", height=45, width=220, command=lambda: self.run_script_thread("Top Tracks/TopTracks.py")).grid(row=1, column=0, pady=10, sticky="w")
+        ctk.CTkButton(self.main_frame, text="Smart Shuffle", height=45, width=220, command=lambda: self.run_script_thread("Shufle/Shufle.py")).grid(row=2, column=0, pady=10, sticky="w")
+
+if __name__ == "__main__":
+    if len(sys.argv) > 2 and sys.argv[1] == "--run":
+        target_script = sys.argv[2]
+        try:
+            ctypes.windll.kernel32.AllocConsole()
+            sys.stdin = open('CONIN$', 'r')
+            sys.stdout = open('CONOUT$', 'w')
+            sys.stderr = open('CONOUT$', 'w')
+        except:
+            pass
+
+        if os.path.exists(target_script):
+            os.chdir(os.path.dirname(target_script))
+            if hasattr(sys, '_MEIPASS'):
+                sys.path.append(sys._MEIPASS)
+            try:
+                runpy.run_path(target_script, run_name="__main__")
+            except Exception as e:
+                print(f"\n❌ Error en el script: {e}")
+            print("\n--- Presiona una tecla para cerrar la consola ---")
+            input()
+        else:
+            time.sleep(5)
+    else:
+        app = SpotifyToolkitApp()
+        app.mainloop()

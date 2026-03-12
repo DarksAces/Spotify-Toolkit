@@ -1,5 +1,6 @@
 import time
 import os
+import sys
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from requests.exceptions import ReadTimeout
@@ -142,7 +143,7 @@ if __name__ == "__main__":
 
     mode, playlist_id = choose_source(playlists)
     if not mode:
-        exit()
+        sys.sys.exit()
 
     if mode == "liked_songs":
         tracks = get_liked_songs()
@@ -151,7 +152,7 @@ if __name__ == "__main__":
 
     if not tracks:
         print("❌ No se encontraron canciones.")
-        exit()
+        sys.sys.exit()
 
     print("\n¿Quieres agrupar por artista (A) o por artistas similares (S)?")
     choice = input("Selecciona (A/S): ").strip().lower()
@@ -164,7 +165,7 @@ if __name__ == "__main__":
         print("🎵 Clasificando por artistas similares...")
     else:
         print("❌ Opción inválida.")
-        exit()
+        sys.sys.exit()
 
     for artist, ids in classified.items():
         if ids:
@@ -173,3 +174,4 @@ if __name__ == "__main__":
             print(f"Sin canciones para {artist}.")
 
     print("\n✨ Proceso completado con éxito.")
+
