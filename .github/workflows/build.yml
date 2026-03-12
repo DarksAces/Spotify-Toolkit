@@ -48,9 +48,14 @@ jobs:
           --add-data "Top Tracks;Top Tracks" `
           main_gui_build.py
 
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SpotifyToolkit-EXE
+        path: dist/SpotifyToolkit.exe
+
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
-      id: create_release
       uses: softprops/action-gh-release@v1
       with:
         files: dist/SpotifyToolkit.exe
