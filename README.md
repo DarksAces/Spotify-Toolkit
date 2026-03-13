@@ -29,10 +29,18 @@ Go to the **Releases** section on the right and download the latest `SpotifyTool
 > [!TIP]
 > **The executable is "Plug & Play".** You do **NOT** need to create a Spotify Dev account or enter your own credentials (Client ID/Secret) if you use the official release. It comes pre-configured and ready to use!
 
+## ✨ Key Features
+- **Integrated Interactive Console:** No more messy terminal windows. Everything happens inside the app.
+- **Fuzzy Matching Search:** Typing "The Beatles" without accents or "Beatls" by mistake? The app will suggest the closest match.
+- **Live Process Control:** Change of heart? Use the **Cancel** button to stop any running script immediately.
+- **Automatic Discovery:** The app automatically lists all your playlists for easy selection.
+- **Background Tasks:** Keep browsing the app's tabs while a tool is working in the background.
+
 ## 📖 Usage
 1. Open `SpotifyToolkit.exe`.
-2. Select the tool you want to use (Duplicate Remover, Genre Separator, etc.).
-3. A browser window will open for you to log in to your Spotify account and authorize the app.
+2. Select the tool you want to use from the sidebar.
+3. If a tool needs your input (like choosing a playlist), **type it in the bottom input bar** of the app and press **Enter**.
+4. Log in to Spotify in the browser window if prompted (only required the first time).
 
 ---
 
@@ -58,10 +66,18 @@ Ve a la sección de **Releases** a la derecha y descarga el último `SpotifyTool
 > [!TIP]
 > **El ejecutable es "Plug & Play".** **NO** es necesario que crees una cuenta de desarrollador de Spotify ni que pongas tus propias credenciales (Client ID/Secret) si usas la versión oficial. ¡Viene ya configurado y listo para usar!
 
+## ✨ Características Principales
+- **Consola Interactiva Integrada:** Se acabaron las ventanas negras de terminal. Todo ocurre dentro de la aplicación.
+- **Búsqueda con "Fuzzy Matching":** ¿Escribiste "The Beatles" sin tildes o "Beatls" por error? La app te sugerirá la coincidencia más cercana.
+- **Control de Procesos en Vivo:** ¿Te arrepentiste? Usa el botón **Cancelar** para detener cualquier script al instante.
+- **Descubrimiento Automático:** La app lista todas tus playlists automáticamente para que solo tengas que elegir un número.
+- **Navegación Fluida:** Sigue explorando las pestañas de la app mientras una herramienta trabaja de fondo.
+
 ## 📖 Uso
 1. Abre `SpotifyToolkit.exe`.
-2. Selecciona la herramienta que quieras usar (Borrar duplicados, Separar por géneros, etc.).
-3. Se abrirá una ventana en tu navegador para que inicies sesión en Spotify y autorices la aplicación.
+2. Selecciona la herramienta que quieras usar en el menú lateral.
+3. Si la herramienta necesita que escribas algo (como elegir una playlist), **escríbelo en la barra inferior** de la app y pulsa **Enter**.
+4. Inicia sesión en Spotify en el navegador si se te solicita (solo la primera vez).
 
 ---
 
@@ -78,10 +94,11 @@ Ve a la sección de **Releases** a la derecha y descarga el último `SpotifyTool
 ### 1. **Credential Injection (GitHub Actions)**
 The most important part of the automation. The `build.yml` workflow takes GitHub Secrets and physically injects them into `main_gui.py` during the build process. This is what allows the "Plug & Play" experience without exposing keys in the public source code.
 
-### 2. **Modular Threading System**
-To prevent the GUI from freezing, every tool (Duplicate Remover, Shuffle, etc.) runs in a separate **thread** using Python's `threading` and `subprocess`. 
-- The main GUI sends the injected credentials to the child scripts via **Environment Variables**.
-- It captures the script's output and shows it in the integrated log console.
+### 2. **Interactive Threading System**
+To prevent the GUI from freezing, every tool runs in a separate **thread**. 
+- The main GUI sends credentials through **Environment Variables**.
+- It features **bidirectional communication**: captures script output and sends user input from the GUI directly to the script's `stdin`.
+- Includes a process termination handler linked to the **Cancel** button.
 
 ### 3. **Smart Resource Management**
 The project uses a custom `get_resource_path()` function to handle file paths. This ensures that icons and sub-scripts are found correctly whether you are running the raw `.py` file or the compiled `.exe`.
@@ -91,10 +108,11 @@ The project uses a custom `get_resource_path()` function to handle file paths. T
 ### **1. Inyección de Credenciales (GitHub Actions)**
 La parte más clave de la automatización. El workflow `build.yml` toma los Secrets de GitHub y los inyecta físicamente en el código de `main_gui.py` durante el proceso de compilación. Esto es lo que permite la experiencia "Plug & Play" sin exponer tus claves en el código fuente público.
 
-### 2. **Sistema de Hilos Modular**
-Para evitar que la interfaz se congele, cada herramienta (Borrar duplicados, Shuffle, etc.) se ejecuta en un **hilo (thread)** separado usando `threading` y `subprocess`.
-- La interfaz principal pasa las credenciales inyectadas a los scripts hijos mediante **Variables de Entorno**.
-- Captura la salida del script y la muestra en la consola de logs integrada.
+### 2. **Sistema de Hilos Interactivo**
+Para evitar que la interfaz se congele, cada herramienta se ejecuta en un **hilo (thread)** separado.
+- La interfaz principal pasa las credenciales inyectadas mediante **Variables de Entorno**.
+- Permite **comunicación bidireccional**: captura la salida de los scripts y envía lo que escribas en la GUI directamente al `stdin` del script hijo.
+- Incluye un gestor de terminación conectado al botón **Cancelar**.
 
 ### 3. **Gestión Inteligente de Recursos**
 El proyecto utiliza una función personalizada `get_resource_path()` para gestionar rutas. Esto asegura que los iconos y sub-scripts se encuentren correctamente tanto si ejecutas el archivo `.py` como el `.exe` compilado.
