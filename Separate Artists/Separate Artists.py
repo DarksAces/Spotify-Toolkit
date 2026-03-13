@@ -153,6 +153,7 @@ if __name__ == "__main__":
     user_id = sp.me()['id']
     playlists = get_user_playlists()
 
+    mode, playlist_id = choose_source(playlists)
     if not mode:
         sys.exit()
 
