@@ -107,6 +107,9 @@ class SpotifyToolkitApp(ctk.CTk):
         self.send_button = ctk.CTkButton(self.input_frame, text="Enviar", width=100, command=self.send_input_to_script, state="disabled")
         self.send_button.grid(row=0, column=1)
 
+        self.stop_button = ctk.CTkButton(self.input_frame, text="Cancelar", width=100, fg_color="#A12222", hover_color="#7A1A1A", command=self.stop_current_process, state="disabled")
+        self.stop_button.grid(row=0, column=2, padx=(10, 0))
+
         if check_credentials():
             self.add_log("✅ Sistema listo para rockear")
         else:
@@ -130,6 +133,14 @@ class SpotifyToolkitApp(ctk.CTk):
                 except Exception as e:
                     self.add_log(f"❌ Error enviando comando: {e}")
 
+    def stop_current_process(self):
+        if self.current_process and self.current_process.poll() is None:
+            try:
+                self.current_process.terminate()
+                self.add_log("\n🛑 Cancelando proceso a petición del usuario...")
+            except Exception as e:
+                self.add_log(f"❌ Error al cancelar: {e}")
+
     def run_script_thread(self, script_path):
         if self.current_process and self.current_process.poll() is None:
             self.add_log("\n⚠️ Ya hay una herramienta en ejecución. Espere a que termine o cierre la App.")
@@ -137,6 +148,7 @@ class SpotifyToolkitApp(ctk.CTk):
 
         def run():
             self.send_button.configure(state="normal")
+            self.stop_button.configure(state="normal")
             abs_script_path = get_resource_path(script_path)
             self.add_log(f"\n🚀 Iniciando: {os.path.basename(script_path)}")
             
@@ -168,12 +180,16 @@ class SpotifyToolkitApp(ctk.CTk):
                     if line:
                         self.add_log(line.strip())
                 
-                self.current_process.wait()
+                return_code = self.current_process.wait()
+                if return_code != 0 and return_code != 1 and return_code != 15: # 15 es SIGTERM en muchos sistemas
+                     self.add_log(f"⚠️ El proceso terminó con aviso (código {return_code})")
+
             except Exception as e:
                 self.add_log(f"❌ Error en proceso: {e}")
             
             self.add_log(f"✅ Proceso terminado")
             self.send_button.configure(state="disabled")
+            self.stop_button.configure(state="disabled")
             self.current_process = None
 
         threading.Thread(target=run, daemon=True).start()
