@@ -58,9 +58,11 @@ def obtener_datos_playlist(playlist_url):
         return [], {}
         
     tracks = resultados['items']
+    print(f"   ∟ Obtenidas {len(tracks)} canciones...")
     while resultados['next']:
         resultados = sp.next(resultados)
         tracks.extend(resultados['items'])
+        print(f"   ∟ Obtenidas {len(tracks)} canciones...")
     
     # Procesar todos los tracks
     for item in tracks:

@@ -34,6 +34,7 @@ if choice == "2":
     while True:
         results = sp.current_user_saved_tracks(limit=50, offset=offset)
         tracks.extend(results['items'])
+        print(f"   ∟ Obtenidas {len(tracks)} canciones...")
         if len(results['items']) < 50:
             break
         offset += 50
@@ -66,6 +67,7 @@ else:
     while True:
         response = sp.playlist_tracks(playlist_id, limit=100, offset=offset)
         tracks.extend(response['items'])
+        print(f"   ∟ Obtenidas {len(tracks)} canciones...")
         if len(response['items']) < 100:
             break
         offset += 100

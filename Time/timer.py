@@ -13,11 +13,12 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
 # Función para obtener top tracks con paginación (máx 50 por request)
 def get_top_tracks(time_range="medium_term", max_tracks=50):
     results = []
-    offset = 0
+    print("🔍 Obteniendo tus canciones favoritas...")
     while len(results) < max_tracks:
         batch_size = min(50, max_tracks - len(results))  # límite máximo 50
         batch = sp.current_user_top_tracks(time_range=time_range, limit=batch_size, offset=offset)
         results.extend(batch['items'])
+        print(f"   ∟ Obtenidas {len(results)} canciones...")
         if len(batch['items']) < batch_size:
             break
         offset += batch_size

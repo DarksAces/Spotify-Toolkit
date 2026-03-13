@@ -35,6 +35,7 @@ if choice == "2":
     while True:
         results = sp.current_user_saved_tracks(limit=50, offset=offset)
         tracks.extend(results['items'])
+        print(f"   ∟ Obtenidas {len(tracks)} canciones...")
         if len(results['items']) < 50:
             break
         offset += 50
@@ -58,6 +59,7 @@ else:
             fields="items.track.id,items.track.name,items.track.artists(name),next"
         )
         tracks.extend(results["items"])
+        print(f"   ∟ Obtenidas {len(tracks)} canciones...")
         if results["next"] is None:
             break
         offset += len(results["items"])

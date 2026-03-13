@@ -19,6 +19,7 @@ playlist_url = input("Ingresa el URL o ID de la playlist que quieres mezclar: ")
 playlist_id = playlist_url.split("/")[-1].split("?")[0]
 
 # Obtener canciones
+print("🔍 Obteniendo canciones de la playlist...")
 canciones = []
 offset = 0
 while True:
@@ -42,6 +43,9 @@ while True:
                 "popularity": track['popularity'],
                 "year": release_year
             })
+    
+    print(f"   ∟ Obtenidas {len(canciones)} canciones...")
+    
     if not response['next']:
         break
     offset += len(response['items'])

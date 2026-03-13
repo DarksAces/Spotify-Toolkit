@@ -23,9 +23,11 @@ def get_liked_songs():
     print("Obteniendo tus canciones favoritas ❤️...")
     results = sp.current_user_saved_tracks(limit=50)
     tracks = results['items']
+    print(f"   ∟ Obtenidas {len(tracks)} canciones...")
     while results['next']:
         results = sp.next(results)
         tracks.extend(results['items'])
+        print(f"   ∟ Obtenidas {len(tracks)} canciones...")
     print(f"Total de canciones obtenidas: {len(tracks)}")
     return tracks
 
@@ -36,9 +38,11 @@ def get_user_playlists():
     print("Cargando tus playlists...")
     results = sp.current_user_playlists()
     playlists = results['items']
+    print(f"   ∟ Encontradas {len(playlists)} playlists...")
     while results['next']:
         results = sp.next(results)
         playlists.extend(results['items'])
+        print(f"   ∟ Encontradas {len(playlists)} playlists...")
     print(f"Playlists encontradas: {len(playlists)}")
     return playlists
 
@@ -72,11 +76,14 @@ def choose_source(playlists):
 # 🎵 OBTENER CANCIONES DE UNA PLAYLIST
 # ===============================
 def get_playlist_tracks(playlist_id):
+    print("Obteniendo canciones de la playlist...")
     results = sp.playlist_tracks(playlist_id)
     tracks = results['items']
+    print(f"   ∟ Obtenidas {len(tracks)} canciones...")
     while results['next']:
         results = sp.next(results)
         tracks.extend(results['items'])
+        print(f"   ∟ Obtenidas {len(tracks)} canciones...")
     print(f"Total de canciones en la playlist: {len(tracks)}")
     return tracks
 
@@ -85,13 +92,18 @@ def get_playlist_tracks(playlist_id):
 # ===============================
 def classify_tracks_by_genre(tracks, genres_to_classify):
     genre_dict = {genre: [] for genre in genres_to_classify}
-    print("\nClasificando canciones por género...")
-    for item in tracks:
+    total = len(tracks)
+    print(f"\nClasificando {total} canciones por género...")
+    for idx, item in enumerate(tracks, 1):
         track = item['track']
+        if not track: continue
         track_id = track['id']
         artist = track['artists'][0]
         artist_id = artist['id']
         artist_name = artist['name']
+
+        if idx % 5 == 0 or idx == total:
+            print(f"   ∟ Procesando {idx}/{total}: {track['name']}...")
 
         while True:
             try:

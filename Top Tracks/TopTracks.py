@@ -203,6 +203,7 @@ while True:
         break
     # Filtrar items nulos
     canciones_existentes.extend([item['track']['uri'] for item in response['items'] if item['track']])
+    print(f"   ∟ Obtenidas {len(canciones_existentes)} canciones...")
     if not response['next']:
         break
     offset += len(response['items'])
@@ -255,6 +256,7 @@ if mezclar == "S":
                     "album": track['album']['name'],
                     "name": track['name']
                 })
+        print(f"   ∟ Obtenidas {len(canciones_info)} canciones...")
         if not response['next']:
             break
         offset += len(response['items'])
