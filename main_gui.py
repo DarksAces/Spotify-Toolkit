@@ -31,7 +31,7 @@ def get_resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 # --- SISTEMA DE CREDENCIALES PLUG & PLAY ---
-load_dotenv() # [CREDENTIALS_MARKER]
+load_dotenv()
 
 def check_credentials():
     return all([os.getenv('SPOTIFY_CLIENT_ID'), os.getenv('SPOTIFY_CLIENT_SECRET'), os.getenv('SPOTIFY_REDIRECT_URI')])
@@ -90,16 +90,14 @@ class SpotifyToolkitApp(ctk.CTk):
         self.log_container.grid(row=1, column=0, sticky="ew", pady=(20, 0))
         self.log_container.grid_columnconfigure(0, weight=1)
 
-        # CONSOLA DE SOLO LECTURA (state="disabled")
         self.log_textbox = ctk.CTkTextbox(self.log_container, height=280, font=("Consolas", 12), state="disabled")
         self.log_textbox.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="ew")
         
-        # Input Frame
         self.input_frame = ctk.CTkFrame(self.log_container, fg_color="transparent")
         self.input_frame.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="ew")
         self.input_frame.grid_columnconfigure(0, weight=1)
 
-        self.command_entry = ctk.CTkEntry(self.input_frame, placeholder_text="Escribir comando aquí...", height=35)
+        self.command_entry = ctk.CTkEntry(self.input_frame, placeholder_text="Escribir aquí...", height=35)
         self.command_entry.grid(row=0, column=0, sticky="ew", padx=(0, 10))
         self.command_entry.bind("<Return>", lambda e: self.send_input_to_script())
 
@@ -110,16 +108,16 @@ class SpotifyToolkitApp(ctk.CTk):
         self.stop_button.grid(row=0, column=2, padx=(10, 0))
 
         if check_credentials():
-            self.add_log("✅ Sistema listo para rockear")
+            self.add_log("✅ Sistema listo")
         else:
-            self.add_log("❌ Error fatal: Credenciales no encontradas")
+            self.add_log("⚠️ Credenciales no encontradas (.env)")
 
         self.show_home()
 
     def add_log(self, text):
-        self.log_textbox.configure(state="normal") # Habilitar para escribir
+        self.log_textbox.configure(state="normal")
         self.log_textbox.insert("end", text + "\n")
-        self.log_textbox.configure(state="disabled") # Bloquear de nuevo
+        self.log_textbox.configure(state="disabled")
         self.log_textbox.see("end")
 
     def send_input_to_script(self):
@@ -131,17 +129,13 @@ class SpotifyToolkitApp(ctk.CTk):
                     self.current_process.stdin.flush()
                     self.add_log(f"> {cmd}")
                     self.command_entry.delete(0, "end")
-                    self.command_entry.focus() # Mantener el foco
                 except Exception as e:
-                    self.add_log(f"❌ Error enviando comando: {e}")
+                    self.add_log(f"❌ Error: {e}")
 
     def stop_current_process(self):
         if self.current_process and self.current_process.poll() is None:
-            try:
-                self.current_process.terminate()
-                self.add_log("\n🛑 Cancelando proceso...")
-            except Exception as e:
-                self.add_log(f"❌ Error al cancelar: {e}")
+            self.current_process.terminate()
+            self.add_log("\n🛑 Proceso cancelado.")
 
     def run_script_thread(self, script_path):
         if self.current_process and self.current_process.poll() is None:
@@ -151,7 +145,7 @@ class SpotifyToolkitApp(ctk.CTk):
         def run():
             self.send_button.configure(state="normal")
             self.stop_button.configure(state="normal")
-            self.command_entry.focus() # Foco automático al empezar
+            self.command_entry.focus()
             abs_script_path = get_resource_path(script_path)
             self.add_log(f"\n🚀 Iniciando: {os.path.basename(script_path)}")
             
@@ -159,9 +153,6 @@ class SpotifyToolkitApp(ctk.CTk):
                 env = os.environ.copy()
                 env['PYTHONIOENCODING'] = 'utf-8'
                 env['PYTHONUNBUFFERED'] = "1"
-                env['SPOTIPY_CLIENT_ID'] = os.getenv('SPOTIFY_CLIENT_ID', '')
-                env['SPOTIPY_CLIENT_SECRET'] = os.getenv('SPOTIFY_CLIENT_SECRET', '')
-                env['SPOTIPY_REDIRECT_URI'] = os.getenv('SPOTIFY_REDIRECT_URI', '')
 
                 self.current_process = subprocess.Popen(
                     [sys.executable, "--run", abs_script_path],
@@ -183,12 +174,10 @@ class SpotifyToolkitApp(ctk.CTk):
                     if line:
                         self.add_log(line.strip())
                 
-                return_code = self.current_process.wait()
-                if return_code not in [0, 1, 15, -15]: 
-                     self.add_log(f"⚠️ Aviso: Código de salida {return_code}")
+                self.current_process.wait()
 
             except Exception as e:
-                self.add_log(f"❌ Error en proceso: {e}")
+                self.add_log(f"❌ Error: {e}")
             
             self.add_log(f"✅ Proceso terminado")
             self.send_button.configure(state="disabled")
@@ -209,16 +198,17 @@ class SpotifyToolkitApp(ctk.CTk):
     def show_clean(self):
         self.clear_content_frame()
         ctk.CTkLabel(self.content_frame, text="Limpieza profunda", font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
-        ctk.CTkButton(self.content_frame, text="Borrar Duplicados", height=45, width=220, command=lambda: self.run_script_thread("Delet Duplicates/delet_duplicates.py")).grid(row=1, column=0, pady=10, sticky="w")
+        ctk.CTkButton(self.content_frame, text="Borrar Duplicados", height=45, width=220, command=lambda: self.run_script_thread("Delete Duplicates/delet_duplicates.py")).grid(row=1, column=0, pady=10, sticky="w")
 
     def show_organize(self):
         self.clear_content_frame()
         ctk.CTkLabel(self.content_frame, text="Organización", font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
         tools = [
-            ("Separar por Géneros", "Separate Genres/Separate Genres.py"),
-            ("Separar por Artistas", "Separate Artists/Separate Artists.py"),
+            ("Separar por Géneros", "Separate Genres/separate_genres.py"),
+            ("Separar por Artistas", "Separate Artists/separate_artists.py"),
             ("Reordenar Playlist", "Reorder/reorder.py"),
-            ("Extraer Artistas", "Extraer Artistas/Extraer Artistas.py")
+            ("Extraer Artistas", "Artist Extractor/artist_extractor.py"),
+            ("Duración Playlist", "Playlist Time/playlist_time.py")
         ]
         for i, (name, path) in enumerate(tools):
             ctk.CTkButton(self.content_frame, text=name, height=45, width=220, command=lambda p=path: self.run_script_thread(p)).grid(row=i+1, column=0, pady=5, sticky="w")
@@ -226,8 +216,9 @@ class SpotifyToolkitApp(ctk.CTk):
     def show_stats(self):
         self.clear_content_frame()
         ctk.CTkLabel(self.content_frame, text="Estadísticas y Mezcla", font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
-        ctk.CTkButton(self.content_frame, text="Top Canciones", height=45, width=220, command=lambda: self.run_script_thread("Top Tracks/TopTracks.py")).grid(row=1, column=0, pady=10, sticky="w")
-        ctk.CTkButton(self.content_frame, text="Smart Shuffle", height=45, width=220, command=lambda: self.run_script_thread("Shufle/Shufle.py")).grid(row=2, column=0, pady=10, sticky="w")
+        ctk.CTkButton(self.content_frame, text="Top Canciones", height=45, width=220, command=lambda: self.run_script_thread("Top Tracks Generator/top_tracks.py")).grid(row=1, column=0, pady=10, sticky="w")
+        ctk.CTkButton(self.content_frame, text="Smart Shuffle", height=45, width=220, command=lambda: self.run_script_thread("Shuffle/shuffle.py")).grid(row=2, column=0, pady=10, sticky="w")
+        ctk.CTkButton(self.content_frame, text="Mood Mixer", height=45, width=220, command=lambda: self.run_script_thread("Mood Mixer/mood_mixer.py")).grid(row=3, column=0, pady=10, sticky="w")
 
 if __name__ == "__main__":
     if len(sys.argv) > 2 and sys.argv[1] == "--run":

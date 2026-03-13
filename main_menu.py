@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import time
 from dotenv import load_dotenv
 
 # Load environment variables from .env file if it exists
@@ -11,14 +12,15 @@ def clear_screen():
 
 def main_menu():
     scripts = {
-        "1": ("Delet Duplicates", "Delet Duplicates/delet_duplicates.py"),
-        "2": ("Extraer Artistas", "Extraer Artistas/Extraer Artistas.py"),
-        "3": ("Separate Genres", "Separate Genres/Separate Genres.py"),
-        "4": ("Separate Artists", "Separate Artists/Separate Artists.py"),
-        "5": ("Top Tracks", "Top Tracks/TopTracks.py"),
-        "6": ("Shuffle", "Shufle/Shufle.py"),
-        "7": ("Playlist Duration (Time)", "Time/timer.py"),
-        "8": ("Reorder Tracks", "Reorder/reorder.py")
+        "1": ("Delete Duplicates", "Delete Duplicates/delet_duplicates.py"),
+        "2": ("Artist Extractor", "Artist Extractor/artist_extractor.py"),
+        "3": ("Separate Genres", "Separate Genres/separate_genres.py"),
+        "4": ("Separate Artists", "Separate Artists/separate_artists.py"),
+        "5": ("Top Tracks Generator", "Top Tracks Generator/top_tracks.py"),
+        "6": ("Shuffle", "Shuffle/shuffle.py"),
+        "7": ("Playlist Duration (Time)", "Playlist Time/playlist_time.py"),
+        "8": ("Reorder Tracks", "Reorder/reorder.py"),
+        "9": ("Mood Mixer", "Mood Mixer/mood_mixer.py")
     }
 
     while True:
@@ -28,7 +30,6 @@ def main_menu():
         print("="*50)
         print("\nElige una herramienta para ejecutar:")
         
-        # We will dynamically find scripts if possible, but for the EXE we use the mapping
         for key, (name, path) in scripts.items():
             print(f"{key}. {name}")
         
@@ -46,14 +47,12 @@ def main_menu():
             full_path = os.path.join(os.path.dirname(__file__), path)
             
             if not os.path.exists(full_path):
-                 # Try to find it if path naming is slightly different
                  print(f"❌ No se encontró el script en: {path}")
                  input("\nPresiona Enter para volver...")
                  continue
 
             print(f"\n🚀 Iniciando: {name}...\n")
             try:
-                # Run the script as a subprocess so it doesn't kill the main menu
                 subprocess.run([sys.executable, full_path], check=True)
             except Exception as e:
                 print(f"❌ Error al ejecutar el script: {e}")
@@ -64,7 +63,6 @@ def main_menu():
             time.sleep(1)
 
 if __name__ == "__main__":
-    # Check if .env exists, if not warn the user
     if not os.path.exists(".env") and not os.getenv("SPOTIFY_CLIENT_ID"):
         print("⚠️  ADVERTENCIA: No se encontró el archivo .env")
         print("Asegúrate de configurar tus credenciales de Spotify API.")
