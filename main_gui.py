@@ -69,11 +69,17 @@ class SpotifyToolkitApp(ctk.CTk):
         self.main_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.main_frame.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
         self.main_frame.grid_columnconfigure(0, weight=1)
-        self.main_frame.grid_rowconfigure(1, weight=1)
+        self.main_frame.grid_rowconfigure(0, weight=1) # Espacio para contenido
+        self.main_frame.grid_rowconfigure(1, weight=0) # Espacio para logs
 
-        # Log
-        self.log_textbox = ctk.CTkTextbox(self.main_frame, height=250, font=("Consolas", 12))
-        self.log_textbox.grid(row=2, column=0, padx=0, pady=(20, 0), sticky="nsew")
+        # Sub-contenedor para el contenido dinámico
+        self.content_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.content_frame.grid(row=0, column=0, sticky="nsew")
+        self.content_frame.grid_columnconfigure(0, weight=1)
+
+        # Log (siempre visible abajo)
+        self.log_textbox = ctk.CTkTextbox(self.main_frame, height=200, font=("Consolas", 12))
+        self.log_textbox.grid(row=1, column=0, padx=0, pady=(20, 0), sticky="ew")
         
         if check_credentials():
             self.add_log("✅ Sistema de Credenciales: CONFIGURADO (Plug & Play Activo)")
@@ -122,25 +128,24 @@ class SpotifyToolkitApp(ctk.CTk):
         self.organize_button.configure(state=state)
         self.stats_button.configure(state=state)
 
-    def clear_main_frame(self):
-        for widget in self.main_frame.winfo_children():
-            if widget != self.log_textbox:
-                widget.destroy()
+    def clear_content_frame(self):
+        for widget in self.content_frame.winfo_children():
+            widget.destroy()
 
     # --- Vistas ---
     def show_home(self):
-        self.clear_main_frame()
-        ctk.CTkLabel(self.main_frame, text="Spotify Toolkit Premium", font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
-        ctk.CTkLabel(self.main_frame, text="Versión ejecutable autónoma. No requiere configuración adicional.", font=self.font_subtitle).grid(row=1, column=0, sticky="nw")
+        self.clear_content_frame()
+        ctk.CTkLabel(self.content_frame, text="Spotify Toolkit Premium", font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        ctk.CTkLabel(self.content_frame, text="Versión ejecutable autónoma. No requiere configuración adicional.", font=self.font_subtitle).grid(row=1, column=0, sticky="nw")
 
     def show_clean(self):
-        self.clear_main_frame()
-        ctk.CTkLabel(self.main_frame, text="Limpieza profunda", font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
-        ctk.CTkButton(self.main_frame, text="Borrar Duplicados", height=45, width=220, command=lambda: self.run_script_thread("Delet Duplicates/delet_duplicates.py")).grid(row=1, column=0, pady=10, sticky="w")
+        self.clear_content_frame()
+        ctk.CTkLabel(self.content_frame, text="Limpieza profunda", font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        ctk.CTkButton(self.content_frame, text="Borrar Duplicados", height=45, width=220, command=lambda: self.run_script_thread("Delet Duplicates/delet_duplicates.py")).grid(row=1, column=0, pady=10, sticky="w")
 
     def show_organize(self):
-        self.clear_main_frame()
-        ctk.CTkLabel(self.main_frame, text="Herramientas de Organización", font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        self.clear_content_frame()
+        ctk.CTkLabel(self.content_frame, text="Herramientas de Organización", font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
         tools = [
             ("Separar por Géneros", "Separate Genres/Separate Genres.py"),
             ("Separar por Artistas", "Separate Artists/Separate Artists.py"),
@@ -149,13 +154,13 @@ class SpotifyToolkitApp(ctk.CTk):
             ("Calculadora Duración", "Time/timer.py")
         ]
         for i, (name, path) in enumerate(tools):
-            ctk.CTkButton(self.main_frame, text=name, height=45, width=220, command=lambda p=path: self.run_script_thread(p)).grid(row=i+1, column=0, pady=5, sticky="w")
+            ctk.CTkButton(self.content_frame, text=name, height=45, width=220, command=lambda p=path: self.run_script_thread(p)).grid(row=i+1, column=0, pady=5, sticky="w")
 
     def show_stats(self):
-        self.clear_main_frame()
-        ctk.CTkLabel(self.main_frame, text="Análisis de Cuenta", font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
-        ctk.CTkButton(self.main_frame, text="Top Canciones", height=45, width=220, command=lambda: self.run_script_thread("Top Tracks/TopTracks.py")).grid(row=1, column=0, pady=10, sticky="w")
-        ctk.CTkButton(self.main_frame, text="Smart Shuffle", height=45, width=220, command=lambda: self.run_script_thread("Shufle/Shufle.py")).grid(row=2, column=0, pady=10, sticky="w")
+        self.clear_content_frame()
+        ctk.CTkLabel(self.content_frame, text="Análisis de Cuenta", font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        ctk.CTkButton(self.content_frame, text="Top Canciones", height=45, width=220, command=lambda: self.run_script_thread("Top Tracks/TopTracks.py")).grid(row=1, column=0, pady=10, sticky="w")
+        ctk.CTkButton(self.content_frame, text="Smart Shuffle", height=45, width=220, command=lambda: self.run_script_thread("Shufle/Shufle.py")).grid(row=2, column=0, pady=10, sticky="w")
 
 if __name__ == "__main__":
     if len(sys.argv) > 2 and sys.argv[1] == "--run":

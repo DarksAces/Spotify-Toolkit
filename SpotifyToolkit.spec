@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['main_menu.py'],
+    ['main_gui.py'],
     pathex=[],
     binaries=[],
     datas=[('Delet Duplicates', 'Delet Duplicates'), ('Extraer Artistas', 'Extraer Artistas'), ('Reorder', 'Reorder'), ('Separate Artists', 'Separate Artists'), ('Separate Genres', 'Separate Genres'), ('Shufle', 'Shufle'), ('Time', 'Time'), ('Top Tracks', 'Top Tracks')],
-    hiddenimports=[],
+    hiddenimports=['spotipy', 'customtkinter'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -29,7 +29,7 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
