@@ -17,7 +17,7 @@ try:
 except SpotifyOauthError as e:
     print(f"\n❌ Error de autenticación: {e}")
     print("Revisa tus credenciales o variables de entorno (CLIENT_ID, CLIENT_SECRET, REDIRECT_URI).")
-    sys.sys.exit()
+    sys.exit()
 
 # ------------------- SELECCIÓN DE FUENTE -------------------
 print("\n¿De dónde quieres mover las canciones?")
@@ -46,7 +46,7 @@ else:
     playlists = sp.current_user_playlists(limit=50)['items']
     if not playlists:
         print("❌ No se encontraron playlists en tu cuenta.")
-        sys.sys.exit()
+        sys.exit()
 
     print("\n🎧 Tus playlists:")
     for i, p in enumerate(playlists, 1):
@@ -58,7 +58,7 @@ else:
         playlist_name = playlists[playlist_idx]['name']
     except (ValueError, IndexError):
         print("❌ Selección inválida.")
-        sys.sys.exit()
+        sys.exit()
 
     # ------------------- OBTENER TRACKS -------------------
     print(f"\nObteniendo canciones de '{playlist_name}'...")
@@ -83,7 +83,7 @@ for i, t in enumerate(tracks):
 
 if not indices:
     print(f"⚠️ No se encontraron canciones de '{artist_name_input}' en '{playlist_name}'.")
-    sys.sys.exit()
+    sys.exit()
 
 # ------------------- REORDENAR (solo si es playlist) -------------------
 if source == "liked":

@@ -151,7 +151,7 @@ if __name__ == "__main__":
 
     mode, playlist_id = choose_source(playlists)
     if not mode:
-        sys.sys.exit()
+        sys.exit()
 
     if mode == "liked_songs":
         tracks = get_liked_songs()
@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
     if not tracks:
         print("❌ No se encontraron canciones.")
-        sys.sys.exit()
+        sys.exit()
 
     print("\nIntroduce los géneros a clasificar (separados por comas):")
     genres_to_classify = input("> ").split(',')
@@ -168,7 +168,7 @@ if __name__ == "__main__":
 
     if not genres_to_classify:
         print("❌ No introdujiste ningún género.")
-        sys.sys.exit()
+        sys.exit()
 
     classified = classify_tracks_by_genre(tracks, genres_to_classify)
     print("🎶 Clasificación completada.")

@@ -153,9 +153,8 @@ if __name__ == "__main__":
     user_id = sp.me()['id']
     playlists = get_user_playlists()
 
-    mode, playlist_id = choose_source(playlists)
     if not mode:
-        sys.sys.exit()
+        sys.exit()
 
     if mode == "liked_songs":
         tracks = get_liked_songs()
@@ -164,7 +163,7 @@ if __name__ == "__main__":
 
     if not tracks:
         print("❌ No se encontraron canciones.")
-        sys.sys.exit()
+        sys.exit()
 
     print("\n¿Quieres agrupar por artista (A) o por artistas similares (S)?")
     choice = input("Selecciona (A/S): ").strip().lower()
@@ -177,7 +176,7 @@ if __name__ == "__main__":
         print("🎵 Clasificando por artistas similares...")
     else:
         print("❌ Opción inválida.")
-        sys.sys.exit()
+        sys.exit()
 
     for artist, ids in classified.items():
         if ids:

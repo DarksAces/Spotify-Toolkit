@@ -6,19 +6,17 @@ import threading
 import time
 import runpy
 import io
+import difflib # Forzamos la inclusión para PyInstaller
 from PIL import Image
 from dotenv import load_dotenv
 
 # --- CORRECCIÓN DE CODIFICACIÓN PARA EMOJIS EN WINDOWS ---
-if sys.stdout is not None and sys.stdout.encoding != 'utf-8':
+if sys.stdout is not None and hasattr(sys.stdout, 'reconfigure'):
     try:
         sys.stdout.reconfigure(encoding='utf-8')
         sys.stderr.reconfigure(encoding='utf-8')
-    except AttributeError:
-        # Para versiones de Python muy antiguas o entornos raros
-        import io
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+    except Exception:
+        pass
 
 def get_base_path():
     if hasattr(sys, '_MEIPASS'):
@@ -45,8 +43,8 @@ class SpotifyToolkitApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("Spotify Toolkit v1.0 - Premium")
-        self.geometry("1000x800")
+        self.title("Spotify Toolkit v1.0.3 - Premium")
+        self.geometry("1000x820")
 
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -92,15 +90,16 @@ class SpotifyToolkitApp(ctk.CTk):
         self.log_container.grid(row=1, column=0, sticky="ew", pady=(20, 0))
         self.log_container.grid_columnconfigure(0, weight=1)
 
-        self.log_textbox = ctk.CTkTextbox(self.log_container, height=250, font=("Consolas", 12))
+        # CONSOLA DE SOLO LECTURA (state="disabled")
+        self.log_textbox = ctk.CTkTextbox(self.log_container, height=280, font=("Consolas", 12), state="disabled")
         self.log_textbox.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="ew")
         
-        # Input Frame (para interactuar con los scripts)
+        # Input Frame
         self.input_frame = ctk.CTkFrame(self.log_container, fg_color="transparent")
         self.input_frame.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="ew")
         self.input_frame.grid_columnconfigure(0, weight=1)
 
-        self.command_entry = ctk.CTkEntry(self.input_frame, placeholder_text="Escribir aquí...", height=35)
+        self.command_entry = ctk.CTkEntry(self.input_frame, placeholder_text="Escribir comando aquí...", height=35)
         self.command_entry.grid(row=0, column=0, sticky="ew", padx=(0, 10))
         self.command_entry.bind("<Return>", lambda e: self.send_input_to_script())
 
@@ -118,7 +117,9 @@ class SpotifyToolkitApp(ctk.CTk):
         self.show_home()
 
     def add_log(self, text):
+        self.log_textbox.configure(state="normal") # Habilitar para escribir
         self.log_textbox.insert("end", text + "\n")
+        self.log_textbox.configure(state="disabled") # Bloquear de nuevo
         self.log_textbox.see("end")
 
     def send_input_to_script(self):
@@ -130,6 +131,7 @@ class SpotifyToolkitApp(ctk.CTk):
                     self.current_process.stdin.flush()
                     self.add_log(f"> {cmd}")
                     self.command_entry.delete(0, "end")
+                    self.command_entry.focus() # Mantener el foco
                 except Exception as e:
                     self.add_log(f"❌ Error enviando comando: {e}")
 
@@ -137,18 +139,19 @@ class SpotifyToolkitApp(ctk.CTk):
         if self.current_process and self.current_process.poll() is None:
             try:
                 self.current_process.terminate()
-                self.add_log("\n🛑 Cancelando proceso a petición del usuario...")
+                self.add_log("\n🛑 Cancelando proceso...")
             except Exception as e:
                 self.add_log(f"❌ Error al cancelar: {e}")
 
     def run_script_thread(self, script_path):
         if self.current_process and self.current_process.poll() is None:
-            self.add_log("\n⚠️ Ya hay una herramienta en ejecución. Espere a que termine o cierre la App.")
+            self.add_log("\n⚠️ Ya hay una herramienta en ejecución.")
             return
 
         def run():
             self.send_button.configure(state="normal")
             self.stop_button.configure(state="normal")
+            self.command_entry.focus() # Foco automático al empezar
             abs_script_path = get_resource_path(script_path)
             self.add_log(f"\n🚀 Iniciando: {os.path.basename(script_path)}")
             
@@ -181,8 +184,8 @@ class SpotifyToolkitApp(ctk.CTk):
                         self.add_log(line.strip())
                 
                 return_code = self.current_process.wait()
-                if return_code != 0 and return_code != 1 and return_code != 15: # 15 es SIGTERM en muchos sistemas
-                     self.add_log(f"⚠️ El proceso terminó con aviso (código {return_code})")
+                if return_code not in [0, 1, 15, -15]: 
+                     self.add_log(f"⚠️ Aviso: Código de salida {return_code}")
 
             except Exception as e:
                 self.add_log(f"❌ Error en proceso: {e}")
@@ -193,10 +196,6 @@ class SpotifyToolkitApp(ctk.CTk):
             self.current_process = None
 
         threading.Thread(target=run, daemon=True).start()
-
-    def state_buttons(self, state):
-        # Mantener botones laterales siempre activos para navegación
-        pass
 
     def clear_content_frame(self):
         for widget in self.content_frame.winfo_children():
@@ -238,7 +237,6 @@ if __name__ == "__main__":
             if hasattr(sys, '_MEIPASS'):
                 sys.path.append(sys._MEIPASS)
             try:
-                # FORZAMOS UTF-8 TAMBIÉN AL EJECUTAR EL SCRIPT INTERNO
                 runpy.run_path(target_script, run_name="__main__")
             except Exception as e:
                 print(f"\n❌ Error fatal en script: {e}")
