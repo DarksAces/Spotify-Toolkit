@@ -48,15 +48,15 @@ def mezclar_flexible(tracks, max_intentos=5000):
 def main():
     while True:
         print("\n=== SMART SHUFFLE (Mezcla inteligente) ===")
-        pl = select_playlist(sp, "Elige la playlist para mezclar")
+        mode, pl_id = select_playlist(sp, "Elige la playlist para mezclar")
         
-        if not pl: break
+        if not mode: break
         
         canciones = []
         offset = 0
-        print(f"🔍 Cargando canciones de '{pl['name']}'...")
+        print(f"🔍 Cargando canciones...")
         while True:
-            res = sp.playlist_items(pl['id'], offset=offset, fields="items.track(uri,artists,album(name)),next")
+            res = sp.playlist_items(pl_id, offset=offset, fields="items.track(uri,artists,album(name)),next")
             for item in res['items']:
                 track = item['track']
                 if track and track['uri'] and track['artists']:
@@ -80,11 +80,11 @@ def main():
         uris = [t['uri'] for t in mezcladas]
         
         # Spotify permite añadir hasta 100 de golpe. Replace_items también.
-        sp.playlist_replace_items(pl['id'], uris[:100])
+        sp.playlist_replace_items(pl_id, uris[:100])
         for i in range(100, len(uris), 100):
-            sp.playlist_add_items(pl['id'], uris[i:i+100])
+            sp.playlist_add_items(pl_id, uris[i:i+100])
         
-        print(f"✅ ¡Hecho! '{pl['name']}' ha sido mezclada.")
+        print(f"✅ ¡Hecho! La playlist ha sido mezclada.")
         
         otra = input("\n¿Quieres mezclar otra playlist? (s/n): ").strip().lower()
         if otra != 's': break

@@ -115,22 +115,33 @@ class SpotifyToolkitApp(ctk.CTk):
         self.show_home()
 
     def add_log(self, text):
-        self.log_textbox.configure(state="normal")
-        self.log_textbox.insert("end", text + "\n")
-        self.log_textbox.configure(state="disabled")
-        self.log_textbox.see("end")
+        def _append():
+            self.log_textbox.configure(state="normal")
+            self.log_textbox.insert("end", text + "\n")
+            self.log_textbox.configure(state="disabled")
+            self.log_textbox.see("end")
+        self.after(0, _append)
+
+    def add_log_raw(self, text):
+        """Adds text without an automatic newline, useful for prompts."""
+        def _append():
+            self.log_textbox.configure(state="normal")
+            self.log_textbox.insert("end", text)
+            self.log_textbox.configure(state="disabled")
+            self.log_textbox.see("end")
+        self.after(0, _append)
 
     def send_input_to_script(self):
         if self.current_process and self.current_process.poll() is None:
             cmd = self.command_entry.get()
-            if cmd:
-                try:
-                    self.current_process.stdin.write(cmd + "\n")
-                    self.current_process.stdin.flush()
-                    self.add_log(f"> {cmd}")
-                    self.command_entry.delete(0, "end")
-                except Exception as e:
-                    self.add_log(f"❌ Error: {e}")
+            # Permitimos enviar vacío si el script lo requiere (ej. pulsar enter)
+            try:
+                self.current_process.stdin.write(cmd + "\n")
+                self.current_process.stdin.flush()
+                self.add_log(f"> {cmd}")
+                self.command_entry.delete(0, "end")
+            except Exception as e:
+                self.add_log(f"❌ Error al enviar input: {e}")
 
     def stop_current_process(self):
         if self.current_process and self.current_process.poll() is None:
@@ -163,23 +174,25 @@ class SpotifyToolkitApp(ctk.CTk):
                     text=True,
                     encoding='utf-8',
                     errors='replace',
-                    bufsize=1,
+                    bufsize=0, # Sin buffer para recibir carácter a carácter
                     creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
                 )
 
+                # Leemos carácter a carácter para capturar prompts sin saltos de línea
                 while True:
-                    line = self.current_process.stdout.readline()
-                    if not line and self.current_process.poll() is not None:
-                        break
-                    if line:
-                        self.add_log(line.strip())
+                    char = self.current_process.stdout.read(1)
+                    if not char:
+                        if self.current_process.poll() is not None:
+                            break
+                        continue
+                    self.add_log_raw(char)
                 
                 self.current_process.wait()
 
             except Exception as e:
-                self.add_log(f"❌ Error: {e}")
+                self.add_log(f"❌ Error crítico: {e}")
             
-            self.add_log(f"✅ Proceso terminado")
+            self.add_log(f"\n✅ Proceso terminado")
             self.send_button.configure(state="disabled")
             self.stop_button.configure(state="disabled")
             self.current_process = None

@@ -44,11 +44,11 @@ def obtener_datos_playlist(playlist_id, playlist_name):
 def main():
     while True:
         print("\n=== ARTIST EXTRACTOR (Estadísticas de Artistas) ===")
-        pl = select_playlist(sp, "Elige una playlist para analizar")
+        mode, pl_id = select_playlist(sp, "Elige una playlist para analizar")
         
-        if not pl: break
+        if not mode: break
         
-        nombres = obtener_datos_playlist(pl['id'], pl['name'])
+        nombres = obtener_datos_playlist(pl_id, "la lista seleccionada")
         if not nombres:
             print("❌ No se encontraron artistas en esta playlist.")
             continue
@@ -56,17 +56,16 @@ def main():
         conteo = Counter(nombres)
         top = conteo.most_common(10)
         
-        print(f"\n📊 TOP 10 ARTISTAS EN '{pl['name']}':")
+        print(f"\n📊 TOP 10 ARTISTAS:")
         for art, count in top:
             print(f"   ∟ {art}: {count} canciones")
         
         # Guardar en archivo
-        clean_name = "".join(x for x in pl['name'] if x.isalnum() or x in " -_").strip()
-        nombre_archivo = f"artistas_{clean_name.replace(' ', '_')}.txt"
+        nombre_archivo = f"artistas_{pl_id}.txt"
         
         try:
             with open(nombre_archivo, "w", encoding="utf-8") as f:
-                f.write(f"Resumen de artistas para: {pl['name']}\n")
+                f.write(f"Resumen de artistas para: {pl_id}\n")
                 f.write("="*40 + "\n")
                 f.write(f"Total de artistas únicos: {len(conteo)}\n")
                 f.write("="*40 + "\n\n")

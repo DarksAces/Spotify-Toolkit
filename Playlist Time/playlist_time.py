@@ -42,28 +42,41 @@ def calculate_playlist_duration(playlist_id, name):
 def main():
     while True:
         print("\n=== CALCULADOR DE TIEMPO (Playlist Duration) ===")
-        mode, pl_id = select_playlist(sp, "Elige una lista para calcular su duración")
+        mode, pl_id = select_playlist(sp, "Elige una lista para calcular su duración", include_liked=True)
         
         if not mode: break
         
-        # Obtenemos el nombre de la playlist (select_playlist devolvía el mode y id, pero el helper original devolvía el objeto. He cambiado el helper a devolver mode y id... espera.)
-        # RE-CHECK: mi helpers.py select_playlist devuelve (mode, id).
-        # Pero necesito el nombre.
+        print(f"⌛ Obteniendo información...")
         
-        # Busco el nombre en la lista de playlists (o lo pido de nuevo)
-        pl_name = "Playlist Seleccionada"
-        playlists = sp.current_user_playlists()['items'] # Una forma rápida
-        for p in playlists:
-            if p['id'] == pl_id:
-                pl_name = p['name']
-                break
+        total_duration_ms = 0
+        track_count = 0
+        
+        try:
+            if mode == "liked_songs":
+                results = sp.current_user_saved_tracks(limit=50)
+            else:
+                results = sp.playlist_tracks(pl_id, limit=50, fields="items.track(duration_ms),next")
+            
+            while results:
+                items = results['items']
+                for item in items:
+                    if item and item['track']:
+                        total_duration_ms += item['track']['duration_ms']
+                        track_count += 1
+                
+                if results['next']:
+                    results = sp.next(results)
+                    print(f"   ∟ Procesadas {track_count} canciones...")
+                else:
+                    results = None
+        except Exception as e:
+            print(f"❌ Error al obtener canciones: {e}")
+            continue
 
-        duration_ms, count = calculate_playlist_duration(pl_id, pl_name)
-        
         print("\n" + "="*40)
-        print(f"📊 RESUMEN PARA: {pl_name}")
-        print(f"🎵 Canciones: {count}")
-        print(f"⏱️ Duración total: {format_duration(duration_ms)}")
+        print(f"📊 RESUMEN:")
+        print(f"🎵 Canciones: {track_count}")
+        print(f"⏱️ Duración total: {format_duration(total_duration_ms)}")
         print("="*40)
         
         otra = input("\n¿Quieres calcular otra? (s/n): ").strip().lower()
