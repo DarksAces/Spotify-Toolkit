@@ -40,14 +40,17 @@ jobs:
         pyinstaller --noconfirm --onefile --windowed --name "SpotifyToolkit" `
           --hidden-import=spotipy `
           --hidden-import=customtkinter `
-          --add-data "Delet Duplicates;Delet Duplicates" `
-          --add-data "Extraer Artistas;Extraer Artistas" `
+          --hidden-import=difflib `
+          --add-data "Delete Duplicates;Delete Duplicates" `
+          --add-data "Artist Extractor;Artist Extractor" `
           --add-data "Reorder;Reorder" `
           --add-data "Separate Artists;Separate Artists" `
           --add-data "Separate Genres;Separate Genres" `
-          --add-data "Shufle;Shufle" `
-          --add-data "Time;Time" `
-          --add-data "Top Tracks;Top Tracks" `
+          --add-data "Shuffle;Shuffle" `
+          --add-data "Playlist Time;Playlist Time" `
+          --add-data "Top Tracks Generator;Top Tracks Generator" `
+          --add-data "Mood Mixer;Mood Mixer" `
+          --add-data "utils;utils" `
           main_gui_build.py
 
     - name: Upload Artifact
