@@ -43,7 +43,7 @@ class SpotifyToolkitApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("Spotify Toolkit v1.0.3 - Premium")
+        self.title("Spotify Toolkit v1.0.4 - Premium")
         self.geometry("1000x820")
 
         self.grid_columnconfigure(1, weight=1)
