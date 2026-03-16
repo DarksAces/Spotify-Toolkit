@@ -12,21 +12,21 @@ def clear_screen():
 
 def main_menu():
     scripts = {
-        "1": ("Delete Duplicates", "Delete Duplicates/delet_duplicates.py"),
-        "2": ("Artist Extractor", "Artist Extractor/artist_extractor.py"),
-        "3": ("Separate Genres", "Separate Genres/separate_genres.py"),
-        "4": ("Separate Artists", "Separate Artists/separate_artists.py"),
-        "5": ("Top Tracks Generator", "Top Tracks Generator/top_tracks.py"),
-        "6": ("Shuffle", "Shuffle/shuffle.py"),
-        "7": ("Playlist Duration (Time)", "Playlist Time/playlist_time.py"),
-        "8": ("Reorder Tracks", "Reorder/reorder.py"),
-        "9": ("Mood Mixer", "Mood Mixer/mood_mixer.py")
+        "1": ("Delete Duplicates", "delete_duplicates/delete_duplicates.py"),
+        "2": ("Artist Extractor", "artist_extractor/artist_extractor.py"),
+        "3": ("Separate Genres", "separate_genres/separate_genres.py"),
+        "4": ("Separate Artists", "separate_artists/separate_artists.py"),
+        "5": ("Top Tracks Generator", "top_tracks_generator/top_tracks_generator.py"),
+        "6": ("Smart Shuffle", "smart_shuffle/smart_shuffle.py"),
+        "7": ("Playlist Duration (Time)", "playlist_time/playlist_time.py"),
+        "8": ("Reorder Tracks", "reorder_tracks/reorder_tracks.py"),
+        "9": ("Mood Mixer", "mood_mixer/mood_mixer.py")
     }
 
     while True:
         clear_screen()
         print("="*50)
-        print("🎵  SPOTIFY TOOLKIT - ALL-IN-ONE  🎵")
+        print("🎵  SPOTIFY TOOLKIT - CLI MENU  🎵")
         print("="*50)
         print("\nElige una herramienta para ejecutar:")
         
@@ -41,7 +41,7 @@ def main_menu():
         if choice == 'Q':
             print("¡Hasta luego! 🎶")
             break
-            
+        
         if choice in scripts:
             name, path = scripts[choice]
             full_path = os.path.join(os.path.dirname(__file__), path)

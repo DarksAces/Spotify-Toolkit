@@ -2,10 +2,21 @@
 
 
 a = Analysis(
-    ['main_gui.py'],
+    ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('Delete Duplicates', 'Delete Duplicates'), ('Artist Extractor', 'Artist Extractor'), ('Reorder', 'Reorder'), ('Separate Artists', 'Separate Artists'), ('Separate Genres', 'Separate Genres'), ('Shuffle', 'Shuffle'), ('Playlist Time', 'Playlist Time'), ('Top Tracks Generator', 'Top Tracks Generator'), ('Mood Mixer', 'Mood Mixer'), ('utils', 'utils')],
+    datas=[
+        ('delete_duplicates', 'delete_duplicates'),
+        ('artist_extractor', 'artist_extractor'),
+        ('reorder_tracks', 'reorder_tracks'),
+        ('separate_artists', 'separate_artists'),
+        ('separate_genres', 'separate_genres'),
+        ('smart_shuffle', 'smart_shuffle'),
+        ('playlist_time', 'playlist_time'),
+        ('top_tracks_generator', 'top_tracks_generator'),
+        ('mood_mixer', 'mood_mixer'),
+        ('utils', 'utils')
+    ],
     hiddenimports=['spotipy', 'customtkinter', 'difflib'],
     hookspath=[],
     hooksconfig={},
