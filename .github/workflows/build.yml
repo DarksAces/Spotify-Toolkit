@@ -24,7 +24,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller spotipy python-dotenv customtkinter pillow
+        pip install -r requirements.txt
+        pip install pyinstaller
 
     - name: Build EXE with Secrets
       shell: pwsh
@@ -33,25 +34,25 @@ jobs:
         SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
         SPOTIFY_REDIRECT_URI: ${{ secrets.SPOTIFY_REDIRECT_URI }}
       run: |
-        $mainMenu = Get-Content main_gui.py -Raw
+        $mainMenu = Get-Content main.py -Raw
         $mainMenu = $mainMenu -replace 'load_dotenv\(\) # \[CREDENTIALS_MARKER\]', "os.environ['SPOTIFY_CLIENT_ID']='${env:SPOTIFY_CLIENT_ID}'; os.environ['SPOTIFY_CLIENT_SECRET']='${env:SPOTIFY_CLIENT_SECRET}'; os.environ['SPOTIFY_REDIRECT_URI']='${env:SPOTIFY_REDIRECT_URI}'"
-        Set-Content main_gui_build.py $mainMenu
+        Set-Content main_build.py $mainMenu
 
         pyinstaller --noconfirm --onefile --windowed --name "SpotifyToolkit" `
           --hidden-import=spotipy `
           --hidden-import=customtkinter `
           --hidden-import=difflib `
-          --add-data "Delete Duplicates;Delete Duplicates" `
-          --add-data "Artist Extractor;Artist Extractor" `
-          --add-data "Reorder;Reorder" `
-          --add-data "Separate Artists;Separate Artists" `
-          --add-data "Separate Genres;Separate Genres" `
-          --add-data "Shuffle;Shuffle" `
-          --add-data "Playlist Time;Playlist Time" `
-          --add-data "Top Tracks Generator;Top Tracks Generator" `
-          --add-data "Mood Mixer;Mood Mixer" `
+          --add-data "delete_duplicates;delete_duplicates" `
+          --add-data "artist_extractor;artist_extractor" `
+          --add-data "reorder_tracks;reorder_tracks" `
+          --add-data "separate_artists;separate_artists" `
+          --add-data "separate_genres;separate_genres" `
+          --add-data "smart_shuffle;smart_shuffle" `
+          --add-data "playlist_time;playlist_time" `
+          --add-data "top_tracks_generator;top_tracks_generator" `
+          --add-data "mood_mixer;mood_mixer" `
           --add-data "utils;utils" `
-          main_gui_build.py
+          main_build.py
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
