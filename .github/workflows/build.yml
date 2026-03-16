@@ -20,13 +20,12 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.9'
-        cache: 'pip'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install -r requirements.txt
-        python -m pip install pyinstaller
+        pip install -r requirements.txt
+        pip install pyinstaller
 
     - name: Build EXE with Secrets
       shell: pwsh
@@ -35,32 +34,48 @@ jobs:
         SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
         SPOTIFY_REDIRECT_URI: ${{ secrets.SPOTIFY_REDIRECT_URI }}
       run: |
-        # Use main.py as the source for the build
-        if (Test-Path main.py) {
-            $mainMenu = Get-Content main.py -Raw
-            $mainMenu = $mainMenu -replace 'load_dotenv\(\) # \[CREDENTIALS_MARKER\]', "os.environ['SPOTIFY_CLIENT_ID']='${env:SPOTIFY_CLIENT_ID}'; os.environ['SPOTIFY_CLIENT_SECRET']='${env:SPOTIFY_CLIENT_SECRET}'; os.environ['SPOTIFY_REDIRECT_URI']='${env:SPOTIFY_REDIRECT_URI}'"
-            Set-Content main_build.py $mainMenu
+        # Usamos Get-ChildItem para ver dónde estamos y qué archivos hay si falla
+        pwd
+        ls
+
+        # Determinar cuál es el archivo principal (por si no se ha subido el renombrado)
+        $sourceFile = "main.py"
+        if (!(Test-Path $sourceFile)) { $sourceFile = "main_gui.py" }
+        
+        if (Test-Path $sourceFile) {
+            $content = Get-Content $sourceFile -Raw
+            $content = $content -replace 'load_dotenv\(\) # \[CREDENTIALS_MARKER\]', "os.environ['SPOTIFY_CLIENT_ID']='${env:SPOTIFY_CLIENT_ID}'; os.environ['SPOTIFY_CLIENT_SECRET']='${env:SPOTIFY_CLIENT_SECRET}'; os.environ['SPOTIFY_REDIRECT_URI']='${env:SPOTIFY_REDIRECT_URI}'"
+            Set-Content main_build.py $content
         } else {
-            Write-Error "main.py not found!"
+            Write-Error "No se encontró el archivo principal (main.py o main_gui.py)"
             exit 1
         }
 
-        # Build with PyInstaller
-        python -m PyInstaller --noconfirm --onefile --windowed --name "SpotifyToolkit" `
-          --hidden-import=spotipy `
-          --hidden-import=customtkinter `
-          --hidden-import=difflib `
-          --add-data "delete_duplicates;delete_duplicates" `
-          --add-data "artist_extractor;artist_extractor" `
-          --add-data "reorder_tracks;reorder_tracks" `
-          --add-data "separate_artists;separate_artists" `
-          --add-data "separate_genres;separate_genres" `
-          --add-data "smart_shuffle;smart_shuffle" `
-          --add-data "playlist_time;playlist_time" `
-          --add-data "top_tracks_generator;top_tracks_generator" `
-          --add-data "mood_mixer;mood_mixer" `
-          --add-data "utils;utils" `
-          main_build.py
+        # Definir carpetas de datos (compatibilidad con nombres viejos y nuevos)
+        $dataArgs = @()
+        $folders = @(
+            "delete_duplicates", "Delete Duplicates",
+            "artist_extractor", "Artist Extractor",
+            "reorder_tracks", "Reorder",
+            "separate_artists", "Separate Artists",
+            "separate_genres", "Separate Genres",
+            "smart_shuffle", "Shuffle",
+            "playlist_time", "Playlist Time",
+            "top_tracks_generator", "Top Tracks Generator",
+            "mood_mixer", "Mood Mixer",
+            "utils", "utils"
+        )
+        
+        for ($i=0; $i -lt $folders.Length; $i+=2) {
+            $dir = $folders[$i]
+            $oldDir = $folders[$i+1]
+            if (Test-Path $dir) { $dataArgs += "--add-data `"$dir;$dir`"" }
+            elseif (Test-Path $oldDir) { $dataArgs += "--add-data `"$oldDir;$oldDir`"" }
+        }
+
+        # Ejecutar PyInstaller con los argumentos dinámicos
+        $cmd = "pyinstaller --noconfirm --onefile --windowed --name `"SpotifyToolkit`" --hidden-import=spotipy --hidden-import=customtkinter --hidden-import=difflib " + ($dataArgs -join " ") + " main_build.py"
+        Invoke-Expression $cmd
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
