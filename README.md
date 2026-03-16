@@ -30,11 +30,12 @@ Go to the **Releases** section on the right and download the latest `SpotifyTool
 > **The executable is "Plug & Play".** You do **NOT** need to create a Spotify Dev account or enter your own credentials (Client ID/Secret) if you use the official release. It comes pre-configured and ready to use!
 
 ## ✨ Key Features
+- **🌍 Auto-Language Detection:** The app automatically switches between English and Spanish based on your OS settings.
+- **📝 Integrated Tool Descriptions:** Every tool includes a brief description of its function directly in the UI.
+- **🔍 Smart Searching:** When choosing a playlist, you can type its name to filter or select it instantly.
 - **Integrated Interactive Console:** No more messy terminal windows. Everything happens inside the app.
-- **Fuzzy Matching Search:** Typing "The Beatles" without accents or "Beatls" by mistake? The app will suggest the closest match.
 - **Live Process Control:** Change of heart? Use the **Cancel** button to stop any running script immediately.
 - **Automatic Discovery:** The app automatically lists all your playlists for easy selection.
-- **Background Tasks:** Keep browsing the app's tabs while a tool is working in the background.
 
 ## 📖 Usage
 1. Open `SpotifyToolkit.exe`.
@@ -67,11 +68,12 @@ Ve a la sección de **Releases** a la derecha y descarga el último `SpotifyTool
 > **El ejecutable es "Plug & Play".** **NO** es necesario que crees una cuenta de desarrollador de Spotify ni que pongas tus propias credenciales (Client ID/Secret) si usas la versión oficial. ¡Viene ya configurado y listo para usar!
 
 ## ✨ Características Principales
+- **🌍 Idioma Automático:** La app detecta si tu PC está en español o inglés y ajusta la interfaz al instante.
+- **📝 Descripciones Detalladas:** Cada herramienta incluye una breve explicación de qué hace antes de ejecutarla.
+- **🔍 Búsqueda Inteligente:** Al elegir una playlist, puedes escribir el nombre directamente para filtrar o seleccionar.
 - **Consola Interactiva Integrada:** Se acabaron las ventanas negras de terminal. Todo ocurre dentro de la aplicación.
-- **Búsqueda con "Fuzzy Matching":** ¿Escribiste "The Beatles" sin tildes o "Beatls" por error? La app te sugerirá la coincidencia más cercana.
 - **Control de Procesos en Vivo:** ¿Te arrepentiste? Usa el botón **Cancelar** para detener cualquier script al instante.
-- **Descubrimiento Automático:** La app lista todas tus playlists automáticamente para que solo tengas que elegir un número.
-- **Navegación Fluida:** Sigue explorando las pestañas de la app mientras una herramienta trabaja de fondo.
+- **Descubrimiento Automático:** La app lista todas tus playlists automáticamente para que solo tengas que elegir.
 
 ## 📖 Uso
 1. Abre `SpotifyToolkit.exe`.
@@ -85,37 +87,25 @@ Ve a la sección de **Releases** a la derecha y descarga el último `SpotifyTool
 
 ### Run from source (Manual Setup):
 1. Clone the repo.
-2. Install dependencies: `pip install spotipy python-dotenv customtkinter pillow`.
-3. Create a `.env` file with your `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, and `SPOTIFY_REDIRECT_URI`.
-4. Run `python main_gui.py`.
+2. Install dependencies: `pip install -r requirements.txt`.
+3. Create a `.env` file using `.env.example` as a template.
+4. Run `python main.py`.
 
 ## 🧠 Code Architecture / Arquitectura del Código
 
 ### 1. **Credential Injection (GitHub Actions)**
-The most important part of the automation. The `build.yml` workflow takes GitHub Secrets and physically injects them into `main_gui.py` during the build process. This is what allows the "Plug & Play" experience without exposing keys in the public source code.
+The build process (`build.yml`) takes GitHub Secrets and injects them into `main.py` during compilation. This enables the "Plug & Play" experience without exposing keys in public source code.
 
-### 2. **Interactive Threading System**
-To prevent the GUI from freezing, every tool runs in a separate **thread**. 
-- The main GUI sends credentials through **Environment Variables**.
-- It features **bidirectional communication**: captures script output and sends user input from the GUI directly to the script's `stdin`.
-- Includes a process termination handler linked to the **Cancel** button.
+### 2. **Multilingual System (i18n)**
+The app uses a central dictionary in `main.py` and `utils/helpers.py` to support multiple languages dynamically based on the system's locale.
 
-### 3. **Smart Resource Management**
-The project uses a custom `get_resource_path()` function to handle file paths. This ensures that icons and sub-scripts are found correctly whether you are running the raw `.py` file or the compiled `.exe`.
+### 3. **Integrated Console Engine**
+To prevent GUI freezing, every tool runs in a separate **thread**. The main interface captures `stdout` in real-time and routes user input to the script's `stdin`.
+
+### 4. **Standardized Structure**
+All modular tools are organized in dedicated folders (e.g., `delete_duplicates/`, `smart_shuffle/`) following naming conventions that avoid spaces for better script compatibility.
 
 ---
-
-### **1. Inyección de Credenciales (GitHub Actions)**
-La parte más clave de la automatización. El workflow `build.yml` toma los Secrets de GitHub y los inyecta físicamente en el código de `main_gui.py` durante el proceso de compilación. Esto es lo que permite la experiencia "Plug & Play" sin exponer tus claves en el código fuente público.
-
-### 2. **Sistema de Hilos Interactivo**
-Para evitar que la interfaz se congele, cada herramienta se ejecuta en un **hilo (thread)** separado.
-- La interfaz principal pasa las credenciales inyectadas mediante **Variables de Entorno**.
-- Permite **comunicación bidireccional**: captura la salida de los scripts y envía lo que escribas en la GUI directamente al `stdin` del script hijo.
-- Incluye un gestor de terminación conectado al botón **Cancelar**.
-
-### 3. **Gestión Inteligente de Recursos**
-El proyecto utiliza una función personalizada `get_resource_path()` para gestionar rutas. Esto asegura que los iconos y sub-scripts se encuentren correctamente tanto si ejecutas el archivo `.py` como el `.exe` compilado.
 
 ## 📄 License
 Distributed under the MIT License. See `LICENSE` for more information.

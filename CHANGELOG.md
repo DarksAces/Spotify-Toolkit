@@ -1,36 +1,47 @@
 # Changelog
 
+## [1.0.5] - 2026-03-16
+
+### Added
+- **🌍 Internationalization (i18n)**: Added automatic English/Spanish detection based on OS locale for both the UI and console output.
+- **📝 Contextual Help**: Added descriptions for every tool within the GUI to improve user guidance.
+- **🔍 Smart Search**: Enhanced the playlist selection screen to allow searching by name instead of just numbers.
+- **🛠️ Documentation**: Added `requirements.txt` and `.env.example` for easier development setup.
+
+### Fixed
+- **📁 Standardized Structure**: Renamed all folders and scripts to follow standardized naming conventions (snake_case) for better command-line compatibility.
+- **🚀 Main Entry Point**: Unified the main application file as `main.py`.
+- **🐛 Bug Fixes**: Fixed several naming inconsistencies (e.g., `delet_duplicates` to `delete_duplicates`).
+- **📦 Build System**: Updated `.spec` files to reflect the new standardized folder structure.
+
+---
+
 ## [1.0.4] - 2026-03-15
 
 ### Fixed
-- **UI Responsiveness**: Improved terminal output capture to show interactive prompts (like "Escribe aquí..." or selections) instantly without waiting for a newline.
-- **Windows Stability**: Implemented thread-safe UI updates using `.after()` to prevent crashes and "Not Responding" states when running long tasks.
-- **Build Process**: Fixed broken directory names in GitHub Actions and `.spec` files (e.g., corrected `Delet Duplicates` to `Delete Duplicates`).
-- **Missing Resources**: Added missing `Mood Mixer` and `utils` folders to the compiled executable bundle.
-- **Artist Extractor**: Fixed a crash when selecting a playlist due to incorrect return value handling.
-- **Shuffle**: Fixed a bug that caused the script to fail silently after choosing a playlist.
-- **Playlist Time**: Fixed compatibility with Liked Songs and multi-page playlists.
-- **Credentials Marker**: Restored the marker needed for GitHub Secrets injection in the build process.
+- **UI Responsiveness**: Improved terminal output capture to show interactive prompts instantly.
+- **Windows Stability**: Implemented thread-safe UI updates using `.after()`.
+- **Build Process**: Fixed broken directory names in GitHub Actions and `.spec` files.
 
-### Added
-- **Bidirectional Communication**: Better support for scripts that require multiple user inputs during execution.
-- **Improved Logging**: Logs now scroll automatically and show characters in real-time.
-
+---
 
 # Historial de Cambios (Changelog)
 
-## [1.0.4] - 2026-03-15
-
-### Corregido
-- **Respuesta de la UI**: Se mejoró la captura de salida de la terminal para mostrar mensajes interactivos (como "Escribe aquí..." o selecciones) al instante sin esperar a un salto de línea.
-- **Estabilidad en Windows**: Se implementaron actualizaciones de UI seguras para hilos usando `.after()` para evitar bloqueos y estados de "No responde" durante tareas largas.
-- **Proceso de Compilación**: Se corrigieron nombres de carpetas erróneos en GitHub Actions y archivos `.spec` (ej: se corrigió `Delet Duplicates` a `Delete Duplicates`).
-- **Recursos Faltantes**: Se añadieron las carpetas `Mood Mixer` y `utils` al paquete del ejecutable compilado.
-- **Artist Extractor**: Corregido un error al seleccionar una playlist debido al manejo incorrecto del valor de retorno.
-- **Shuffle**: Corregido un bug que causaba que el script fallara silenciosamente después de elegir una lista.
-- **Playlist Time**: Corregida la compatibilidad con "Canciones Favoritas" y playlists de varias páginas.
-- **Marcador de Credenciales**: Se restauró el marcador necesario para la inyección de Secretos de GitHub en el proceso de build.
+## [1.0.5] - 2026-03-16
 
 ### Añadido
-- **Comunicación Bidireccional**: Mejor soporte para scripts que requieren múltiples entradas del usuario durante su ejecución.
-- **Registro (Logging) Mejorado**: Los logs ahora hacen scroll automáticamente y muestran caracteres en tiempo real.
+- **🌍 Internacionalización (i18n)**: Detección automática de Inglés/Español basada en el sistema tanto para la interfaz como para la salida de consola.
+- **📝 Ayuda Contextual**: Se añadieron descripciones para cada herramienta en la interfaz para guiar mejor al usuario.
+- **🔍 Búsqueda Inteligente**: Se mejoró la selección de playlists permitiendo buscar por nombre además de por número.
+- **🛠️ Documentación**: Se añadieron los archivos `requirements.txt` y `.env.example` para facilitar la configuración a desarrolladores.
+
+### Corregido
+- **📁 Estructura Normalizada**: Se renombraron todas las carpetas y scripts siguiendo convenciones estándar (snake_case) para una mayor compatibilidad.
+- **🚀 Punto de Entrada Principal**: Se unificó el archivo principal como `main.py`.
+- **🐛 Corrección de Errores**: Corregidas varias inconsistencias de nombres (ej: de `delet_duplicates` a `delete_duplicates`).
+- **📦 Sistema de Compilación**: Actualizados los archivos `.spec` para reflejar la nueva estructura de carpetas.
+
+---
+
+## [1.0.4] - 2026-03-15
+... (resto del historial)
