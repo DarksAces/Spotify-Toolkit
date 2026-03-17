@@ -34,8 +34,8 @@ def get_resource_path(relative_path):
 # --- INTERNATIONALIZATION (i18n) ---
 def get_system_lang():
     try:
-        # En Windows, getdefaultlocale puede fallar o devolver None
-        lang = locale.getdefaultlocale()[0]
+        # En Python 3.11+, getdefaultlocale() está deprecado.
+        lang = locale.getlocale()[0]
         if lang and lang.lower().startswith('es'):
             return 'es'
     except:
@@ -74,8 +74,8 @@ TEXTS = {
         'desc_top_tracks': "Genera una lista con tus canciones más escuchadas en diferentes periodos.",
         'btn_smart_shuffle': "Smart Shuffle",
         'desc_smart_shuffle': "Mezcla tus listas evitando que suenen dos canciones seguidas del mismo artista.",
-        'btn_mood_mixer': "Mood Mixer",
-        'desc_mood_mixer': "Crea una nueva lista filtrando canciones por su estado de ánimo (Chill, Fiesta, etc).",
+        'btn_metadata_export': "Exportar Metadatos",
+        'desc_metadata_export': "Exporta una playlist a CSV o JSON para usar en otras plataformas.",
         'input_placeholder': "Escribir aquí...",
         'btn_send': "Enviar",
         'btn_cancel': "Cancelar",
@@ -115,8 +115,8 @@ TEXTS = {
         'desc_top_tracks': "Generate a list of your most listened tracks over different periods.",
         'btn_smart_shuffle': "Smart Shuffle",
         'desc_smart_shuffle': "Shuffle your lists while avoiding two songs from the same artist in a row.",
-        'btn_mood_mixer': "Mood Mixer",
-        'desc_mood_mixer': "Create a new list by filtering songs based on their mood (Chill, Party, etc).",
+        'btn_metadata_export': "Export Metadata",
+        'desc_metadata_export': "Export a playlist to CSV or JSON for use on other platforms.",
         'input_placeholder': "Type here...",
         'btn_send': "Send",
         'btn_cancel': "Cancel",
@@ -266,8 +266,16 @@ class SpotifyToolkitApp(ctk.CTk):
                 env['PYTHONIOENCODING'] = 'utf-8'
                 env['PYTHONUNBUFFERED'] = "1"
 
+                # Determinamos el comando de ejecución correctamente
+                if hasattr(sys, '_MEIPASS'):
+                    # Si es el ejecutable compilado
+                    cmd = [sys.executable, "--run", abs_script_path]
+                else:
+                    # Si se ejecuta desde el código fuente
+                    cmd = [sys.executable, sys.argv[0], "--run", abs_script_path]
+
                 self.current_process = subprocess.Popen(
-                    [sys.executable, "--run", abs_script_path],
+                    cmd,
                     env=env,
                     stdin=subprocess.PIPE,
                     stdout=subprocess.PIPE,
@@ -327,7 +335,8 @@ class SpotifyToolkitApp(ctk.CTk):
             (T['btn_separate_artists'], T['desc_separate_artists'], "separate_artists/separate_artists.py"),
             (T['btn_reorder_tracks'], T['desc_reorder_tracks'], "reorder_tracks/reorder_tracks.py"),
             (T['btn_artist_extractor'], T['desc_artist_extractor'], "artist_extractor/artist_extractor.py"),
-            (T['btn_playlist_time'], T['desc_playlist_time'], "playlist_time/playlist_time.py")
+            (T['btn_playlist_time'], T['desc_playlist_time'], "playlist_time/playlist_time.py"),
+            (T['btn_metadata_export'], T['desc_metadata_export'], "metadata_export/metadata_export.py")
         ]
         for i, (name, desc, path) in enumerate(tools):
             self.add_tool_button(name, desc, path, i+1)
@@ -337,7 +346,6 @@ class SpotifyToolkitApp(ctk.CTk):
         ctk.CTkLabel(self.content_frame, text=T['stats_title'], font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
         self.add_tool_button(T['btn_top_tracks'], T['desc_top_tracks'], "top_tracks_generator/top_tracks_generator.py", 1)
         self.add_tool_button(T['btn_smart_shuffle'], T['desc_smart_shuffle'], "smart_shuffle/smart_shuffle.py", 2)
-        self.add_tool_button(T['btn_mood_mixer'], T['desc_mood_mixer'], "mood_mixer/mood_mixer.py", 3)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2 and sys.argv[1] == "--run":

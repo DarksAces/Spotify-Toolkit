@@ -4,7 +4,7 @@ import locale
 
 def get_sys_lang():
     try:
-        lang = locale.getdefaultlocale()[0]
+        lang = locale.getlocale()[0]
         if lang and lang.lower().startswith('es'):
             return 'es'
     except:
