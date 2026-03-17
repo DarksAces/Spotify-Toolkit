@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.6] - 2026-03-17
+
+### Added
+- **📦 Metadata Export**: The metadata export tool is now officially included in the compiled distribution.
+- **⚡ Automated Builds**: Integrated GitHub Actions with the `Develop` branch for faster tool updates.
+
+### Fixed
+- **🛡️ Robustness Improvements**: Prevented crashes when encountering empty playlists or tracks with missing metadata in `utils/helpers.py`.
+- **🔄 Pagination Logic**: Improved API pagination and added safety checks for large libraries.
+
+---
+
 ## [1.0.5] - 2026-03-16
 
 ### Added
@@ -26,6 +38,18 @@
 ---
 
 # Historial de Cambios (Changelog)
+
+## [1.0.6] - 2026-03-17
+
+### Añadido
+- **📦 Exportación de Metadatos**: La herramienta para exportar metadatos ya está incluida oficialmente en la versión compilada.
+- **⚡ Builds Automatizados**: Integración de GitHub Actions con la rama `Develop` para actualizaciones más rápidas.
+
+### Corregido
+- **🛡️ Mejoras de Robustez**: Se evitaron cierres inesperados al encontrar playlists vacías o canciones con metadatos incompletos en `utils/helpers.py`.
+- **🔄 Lógica de Paginación**: Se mejoró la paginación de la API y se añadieron comprobaciones de seguridad para bibliotecas grandes.
+
+---
 
 ## [1.0.5] - 2026-03-16
 
