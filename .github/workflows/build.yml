@@ -2,6 +2,7 @@ name: Build Spotify Toolkit EXE
 
 on:
   push:
+    branches: [ Develop ]
     tags:
       - 'v*'
   workflow_dispatch:
@@ -54,6 +55,7 @@ jobs:
             "playlist_time", "Playlist Time",
             "top_tracks_generator", "Top Tracks Generator",
             "mood_mixer", "Mood Mixer",
+            "metadata_export", "metadata_export",
             "utils", "utils"
         )
 
