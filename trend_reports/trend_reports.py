@@ -21,16 +21,6 @@ except ImportError:
         scope='user-library-read user-top-read'
     ))
 
-def get_audio_features_in_batches(track_ids):
-    features = []
-    for i in range(0, len(track_ids), 100):
-        batch = track_ids[i:i+100]
-        # Filter out None IDs
-        batch = [tid for tid in batch if tid]
-        if batch:
-            features.extend(sp.audio_features(batch))
-    return features
-
 def analyze_genres(tracks):
     print("🧬 Analizando géneros (esto puede tardar si hay muchos artistas)...")
     artist_ids = set()
@@ -52,26 +42,7 @@ def analyze_genres(tracks):
     
     return Counter(genres).most_common(10)
 
-def calculate_audio_profile(features):
-    print("📈 Calculando perfil de audio...")
-    valid_features = [f for f in features if f]
-    if not valid_features:
-        return None
-    
-    count = len(valid_features)
-    avg_energy = sum(f['energy'] for f in valid_features) / count
-    avg_valence = sum(f['valence'] for f in valid_features) / count
-    avg_danceability = sum(f['danceability'] for f in valid_features) / count
-    avg_tempo = sum(f['tempo'] for f in valid_features) / count
-    
-    return {
-        "energy": avg_energy,
-        "valence": avg_valence,
-        "danceability": avg_danceability,
-        "tempo": avg_tempo
-    }
-
-def save_report(top_genres, profile, total_tracks):
+def save_report(top_genres, total_tracks):
     date_str = datetime.now().strftime("%Y-%m-%d_%H-%M")
     filename = f"Spotify_Trend_Report_{date_str}.txt"
     
@@ -86,14 +57,6 @@ def save_report(top_genres, profile, total_tracks):
         f.write("🧬 Top 10 Géneros:\n")
         for genre, count in top_genres:
             f.write(f"- {genre.title()}: {count} artistas\n")
-        f.write("\n")
-        
-        if profile:
-            f.write("📈 Perfil de Audio Promedio:\n")
-            f.write(f"- Energía: {profile['energy']:.2f} (0-1)\n")
-            f.write(f"- Positividad (Valence): {profile['valence']:.2f} (0-1)\n")
-            f.write(f"- Bailabilidad: {profile['danceability']:.2f} (0-1)\n")
-            f.write(f"- Ritmo (BPM): {profile['tempo']:.1f} BPM\n")
         
         f.write("\n" + "="*30 + "\n")
         f.write("Generado por Spotify Toolkit\n")
@@ -111,18 +74,12 @@ def main():
 
     top_genres = analyze_genres(tracks)
     
-    track_ids = [t['track']['id'] for t in tracks]
-    features = get_audio_features_in_batches(track_ids)
-    profile = calculate_audio_profile(features)
-    
     print("\n✅ Análisis completado.")
-    filename = save_report(top_genres, profile, len(tracks))
+    filename = save_report(top_genres, len(tracks))
     
     print(f"\n📄 Informe guardado como: {filename}")
     print("Contenido resumido:")
     print(f"- Género principal: {top_genres[0][0].title() if top_genres else 'N/A'}")
-    if profile:
-        print(f"- BPM Promedio: {profile['tempo']:.1f}")
 
 if __name__ == "__main__":
     main()
