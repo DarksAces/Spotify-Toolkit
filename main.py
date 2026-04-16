@@ -254,24 +254,9 @@ class SpotifyToolkitApp(ctk.CTk):
     def add_log_raw(self, text):
         def _append():
             self.log_textbox.configure(state="normal")
-            tag = None
-            if "✅" in text: tag = "success"
-            elif "❌" in text or "🛑" in text: tag = "error"
-            elif "⚠️" in text: tag = "warning"
-            elif "🚀" in text or "🔍" in text: tag = "info"
-            
-            self.log_textbox.insert("end", text, tag)
+            self.log_textbox.insert("end", text)
             self.log_textbox.configure(state="disabled")
             self.log_textbox.see("end")
-            
-            if "PROG:" in text:
-                try:
-                    match = re.search(r'PROG:(\d+)', text)
-                    if match:
-                        val = int(match.group(1)) / 100.0
-                        self.progress_bar.set(val)
-                except:
-                    pass
         self.after(0, _append)
 
     def send_input_to_script(self):
@@ -350,25 +335,14 @@ class SpotifyToolkitApp(ctk.CTk):
         ctk.CTkLabel(self.content_frame, text=T['welcome_desc'], font=self.font_subtitle, text_color=self.subtext_color).grid(row=1, column=0, sticky="nw")
 
     def add_tool_button(self, name, desc, path, row):
-        card = ctk.CTkFrame(self.content_frame, fg_color=self.card_color, corner_radius=10)
-        card.grid(row=row, column=0, pady=5, sticky="ew")
-        card.grid_columnconfigure(0, weight=1)
-
-        lbl_frame = ctk.CTkFrame(card, fg_color="transparent")
-        lbl_frame.grid(row=0, column=0, padx=20, pady=15, sticky="w")
-
-        ctk.CTkLabel(lbl_frame, text=name, font=self.font_subtitle, text_color=self.text_color).pack(anchor="w")
-        ctk.CTkLabel(lbl_frame, text=desc, font=self.font_desc, text_color=self.subtext_color).pack(anchor="w")
-
-        btn = ctk.CTkButton(card, text="RUN", width=80, height=32, corner_radius=16, 
-                            fg_color="#333333", hover_color="#444444", text_color=self.text_color,
-                            command=lambda p=path: self.run_script_thread(p), font=ctk.CTkFont(weight="bold"))
-        btn.grid(row=0, column=1, padx=20, pady=15)
+        btn = ctk.CTkButton(self.content_frame, text=name, height=40, width=220, command=lambda: self.run_script_thread(path))
+        btn.grid(row=row*2, column=0, pady=(10, 0), sticky="w")
+        lbl = ctk.CTkLabel(self.content_frame, text=desc, font=self.font_desc, text_color="gray70")
+        lbl.grid(row=row*2+1, column=0, padx=(5, 0), pady=(0, 10), sticky="w")
 
     def show_clean(self):
         self.clear_content_frame()
-        ctk.CTkLabel(self.content_frame, text=T['clean_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
-        # Borrar Duplicados
+        ctk.CTkLabel(self.content_frame, text=T['clean_title'], font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
         self.add_tool_button(T['btn_delete_duplicates'], T['desc_delete_duplicates'], "delete_duplicates/delete_duplicates.py", 1)
 
     def show_organize(self):

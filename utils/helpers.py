@@ -110,25 +110,38 @@ def select_playlist(sp, prompt="Elige una playlist:", include_liked=False):
                 print(HT['write_exact'])
 
 def get_all_tracks(sp, mode, playlist_id=None):
-    """Obtiene todas las canciones de una playlist o de 'Liked Songs'."""
+    """Obtiene todas las canciones de una playlist o de 'Liked Songs' con reporte de progreso."""
     tracks = []
     try:
         if mode == "liked_songs":
             print(HT['getting_liked'])
             results = sp.current_user_saved_tracks(limit=50)
+            total = results.get('total', 0)
         else:
             print(HT['getting_playlist'])
             results = sp.playlist_tracks(playlist_id)
+            total = results.get('total', 0)
         
+        fetched = 0
         while results:
-            tracks.extend(results.get('items', []))
+            items = results.get('items', [])
+            tracks.extend(items)
+            fetched += len(items)
+            
+            # Reportar progreso
+            if total > 0:
+                percent = int((fetched / total) * 100)
+                print(f"PROG:{percent}")
+                sys.stdout.flush()
+
             results = sp.next(results) if results.get('next') else None
     except Exception as e:
         print(f"⚠️ Error al obtener canciones: {e}")
     
     # Filtrar tracks válidos
     tracks = [t for t in tracks if t and isinstance(t, dict) and t.get('track') and t['track'].get('id')]
-    print(f"{HT['total_obtained']} {len(tracks)}")
+    print(f"\n{HT['total_obtained']} {len(tracks)}")
+    print("PROG:100") # Aseguramos bandera al terminar
     return tracks
 
 def format_duration(ms):
