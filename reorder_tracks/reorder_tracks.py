@@ -48,6 +48,30 @@ def main():
             continue
 
         print(f"✅ Se han encontrado {len(matches)} canciones.")
+<<<<<<< Develop
+<<<<<<< Updated upstream
+
+        if mode == "liked_songs":
+            print("⚠️ No se puede reordenar 'Favoritos' vía API.")
+            print("Se recomienda crear una nueva playlist.")
+        else:
+            print("📤 Moviendo canciones al final...")
+            # Reordenar en orden inverso para no alterar los índices de las de arriba
+            total_tracks = len(tracks)
+            offset_extra = 0
+            for idx in sorted(matches, reverse=True):
+                # Spotify playlist_reorder_items(playlist_id, range_start, insert_before)
+                sp.playlist_reorder_items(pl_id, range_start=idx, insert_before=total_tracks)
+                offset_extra += 1
+            
+            print(f"✅ ¡Hecho! {len(matches)} canciones movidas al final.")
+=======
+        print("📤 Moviendo canciones al final...")
+        
+        total_tracks = len(tracks)
+        for i, idx in enumerate(sorted(matches, reverse=True)):
+            sp.playlist_reorder_items(pl_id, range_start=idx, insert_before=total_tracks)
+=======
         print("📤 Moviendo canciones al final...")
         
         # Reordenar en orden inverso para no alterar los índices de las de arriba
@@ -63,6 +87,7 @@ def main():
             sp.playlist_reorder_items(pl_id, range_start=idx, insert_before=total_tracks)
             
             # Reportar progreso a la interfaz
+>>>>>>> main
             percent = int(((i + 1) / len(matches)) * 100)
             print(f"PROG:{percent}")
             sys.stdout.flush()
