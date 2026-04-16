@@ -111,4 +111,10 @@ All modular tools are organized in dedicated folders (e.g., `delete_duplicates/`
 Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
+
+## 🤝 Community & Support
+Got an idea or stuck with a bug?
+- 💬 **Join the [Discussions](https://github.com/DarksAces/Spotify-Toolkit/discussions)** to suggest features or show off your playlists.
+- 🛠️ **Open an [Issue](https://github.com/DarksAces/Spotify-Toolkit/issues)** to report technical problems.
+
 *Developed with ❤️ for music lovers.*
