@@ -52,12 +52,6 @@ def main():
         
         # Reordenar en orden inverso para no alterar los índices de las de arriba
         total_tracks = len(tracks)
-<<<<<<< Updated upstream
-        for idx in sorted(matches, reverse=True):
-            sp.playlist_reorder_items(pl_id, range_start=idx, insert_before=total_tracks)
-        
-        print(f"✅ ¡Hecho! {len(matches)} canciones movidas al final.")
-=======
         for i, idx in enumerate(sorted(matches, reverse=True)):
             # Spotify playlist_reorder_items(playlist_id, range_start, insert_before)
             sp.playlist_reorder_items(pl_id, range_start=idx, insert_before=total_tracks)
@@ -68,7 +62,6 @@ def main():
             sys.stdout.flush()
         
         print(f"\n✅ ¡Hecho! {len(matches)} canciones movidas al final.")
->>>>>>> Stashed changes
 
         otra = input("\n¿Quieres reordenar otra? (s/n): ").strip().lower()
         if otra != 's': break
