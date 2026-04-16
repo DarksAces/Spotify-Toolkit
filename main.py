@@ -147,38 +147,49 @@ class SpotifyToolkitApp(ctk.CTk):
         self.title(T['title'])
         self.geometry("1000x850")
 
+        # Official Spotify Hex Palette
+        self.bg_color = "#121212"      # Main content background
+        self.sidebar_color = "#000000" # True black sidebar
+        self.accent_color = "#1DB954"  # Spotify Green
+        self.hover_color = "#1ed760"    # Lighter Green
+        self.text_color = "#FFFFFF"
+        self.subtext_color = "#B3B3B3"
+        self.card_color = "#181818"    # Subtle card background
+
+        self.configure(fg_color=self.bg_color)
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        self.font_title = ctk.CTkFont(family="Inter", size=24, weight="bold")
-        self.font_subtitle = ctk.CTkFont(family="Inter", size=14)
-        self.font_desc = ctk.CTkFont(family="Inter", size=13, slant="italic")
+        self.font_title = ctk.CTkFont(family="Inter", size=32, weight="bold")
+        self.font_sidebar = ctk.CTkFont(family="Inter", size=14, weight="bold")
+        self.font_subtitle = ctk.CTkFont(family="Inter", size=16, weight="bold")
+        self.font_desc = ctk.CTkFont(family="Inter", size=13)
         
         self.current_process = None
 
         # Sidebar
-        self.sidebar_frame = ctk.CTkFrame(self, width=200, corner_radius=0)
+        self.sidebar_frame = ctk.CTkFrame(self, width=220, corner_radius=0, fg_color=self.sidebar_color)
         self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(5, weight=1)
 
-        self.logo_label = ctk.CTkLabel(self.sidebar_frame, text="🎵 Toolkit", font=self.font_title)
-        self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
+        self.logo_label = ctk.CTkLabel(self.sidebar_frame, text="Toolkit", font=ctk.CTkFont(size=26, weight="bold"), text_color=self.text_color)
+        self.logo_label.grid(row=0, column=0, padx=25, pady=(40, 30), sticky="w")
 
-        self.home_button = ctk.CTkButton(self.sidebar_frame, text=T['sidebar_home'], command=self.show_home, fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"))
-        self.home_button.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
+        self.home_button = ctk.CTkButton(self.sidebar_frame, text="🏠 " + T['sidebar_home'], command=self.show_home, fg_color="transparent", text_color=self.subtext_color, hover_color="#282828", anchor="w", font=self.font_sidebar, height=40)
+        self.home_button.grid(row=1, column=0, padx=15, pady=5, sticky="ew")
 
-        self.clean_button = ctk.CTkButton(self.sidebar_frame, text=T['sidebar_clean'], command=self.show_clean, fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"))
-        self.clean_button.grid(row=2, column=0, padx=20, pady=10, sticky="ew")
+        self.clean_button = ctk.CTkButton(self.sidebar_frame, text="🧹 " + T['sidebar_clean'], command=self.show_clean, fg_color="transparent", text_color=self.subtext_color, hover_color="#282828", anchor="w", font=self.font_sidebar, height=40)
+        self.clean_button.grid(row=2, column=0, padx=15, pady=5, sticky="ew")
 
-        self.organize_button = ctk.CTkButton(self.sidebar_frame, text=T['sidebar_organize'], command=self.show_organize, fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"))
-        self.organize_button.grid(row=3, column=0, padx=20, pady=10, sticky="ew")
+        self.organize_button = ctk.CTkButton(self.sidebar_frame, text="🗂️ " + T['sidebar_organize'], command=self.show_organize, fg_color="transparent", text_color=self.subtext_color, hover_color="#282828", anchor="w", font=self.font_sidebar, height=40)
+        self.organize_button.grid(row=3, column=0, padx=15, pady=5, sticky="ew")
 
-        self.stats_button = ctk.CTkButton(self.sidebar_frame, text=T['sidebar_stats'], command=self.show_stats, fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"))
-        self.stats_button.grid(row=4, column=0, padx=20, pady=10, sticky="ew")
+        self.stats_button = ctk.CTkButton(self.sidebar_frame, text="📊 " + T['sidebar_stats'], command=self.show_stats, fg_color="transparent", text_color=self.subtext_color, hover_color="#282828", anchor="w", font=self.font_sidebar, height=40)
+        self.stats_button.grid(row=4, column=0, padx=15, pady=5, sticky="ew")
 
         # Main Container
-        self.main_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.main_frame.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
+        self.main_frame = ctk.CTkFrame(self, fg_color=self.bg_color)
+        self.main_frame.grid(row=0, column=1, padx=30, pady=30, sticky="nsew")
         self.main_frame.grid_columnconfigure(0, weight=1)
         self.main_frame.grid_rowconfigure(0, weight=1) 
         self.main_frame.grid_rowconfigure(1, weight=0) 
@@ -188,25 +199,36 @@ class SpotifyToolkitApp(ctk.CTk):
         self.content_frame.grid_columnconfigure(0, weight=1)
 
         # Log Area
-        self.log_container = ctk.CTkFrame(self.main_frame)
+        self.log_container = ctk.CTkFrame(self.main_frame, fg_color="#181818", corner_radius=10)
         self.log_container.grid(row=1, column=0, sticky="ew", pady=(20, 0))
         self.log_container.grid_columnconfigure(0, weight=1)
 
-        self.log_textbox = ctk.CTkTextbox(self.log_container, height=280, font=("Consolas", 12), state="disabled")
-        self.log_textbox.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="ew")
+        self.log_textbox = ctk.CTkTextbox(self.log_container, height=280, font=("Consolas", 12), state="disabled", fg_color="transparent", text_color="#E0E0E0")
+        self.log_textbox.grid(row=0, column=0, padx=15, pady=(15, 5), sticky="ew")
+        
+        # Configure color tags
+        self.log_textbox.tag_config("success", foreground="#1DB954") # Spotify Green
+        self.log_textbox.tag_config("error", foreground="#FF4B4B")   # Soft Red
+        self.log_textbox.tag_config("warning", foreground="#FFD700") # Gold
+        self.log_textbox.tag_config("info", foreground="#53B2FF")    # Bright Blue
         
         self.input_frame = ctk.CTkFrame(self.log_container, fg_color="transparent")
-        self.input_frame.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="ew")
+        self.input_frame.grid(row=1, column=0, padx=15, pady=(0, 10), sticky="ew")
         self.input_frame.grid_columnconfigure(0, weight=1)
 
-        self.command_entry = ctk.CTkEntry(self.input_frame, placeholder_text=T['input_placeholder'], height=35)
+        self.command_entry = ctk.CTkEntry(self.input_frame, placeholder_text=T['input_placeholder'], height=40, corner_radius=20, border_color="#333333", fg_color="#2A2A2A")
         self.command_entry.grid(row=0, column=0, sticky="ew", padx=(0, 10))
         self.command_entry.bind("<Return>", lambda e: self.send_input_to_script())
 
-        self.send_button = ctk.CTkButton(self.input_frame, text=T['btn_send'], width=100, command=self.send_input_to_script, state="disabled")
+        # Progress Bar
+        self.progress_bar = ctk.CTkProgressBar(self.log_container, height=6, corner_radius=3, progress_color=self.accent_color, fg_color="#333333")
+        self.progress_bar.grid(row=2, column=0, padx=15, pady=(0, 15), sticky="ew")
+        self.progress_bar.set(0)
+
+        self.send_button = ctk.CTkButton(self.input_frame, text=T['btn_send'], width=100, corner_radius=20, command=self.send_input_to_script, state="disabled", fg_color=self.accent_color, hover_color=self.hover_color, text_color="#000000", font=ctk.CTkFont(weight="bold"))
         self.send_button.grid(row=0, column=1)
 
-        self.stop_button = ctk.CTkButton(self.input_frame, text=T['btn_cancel'], width=100, fg_color="#A12222", hover_color="#7A1A1A", command=self.stop_current_process, state="disabled")
+        self.stop_button = ctk.CTkButton(self.input_frame, text=T['btn_cancel'], width=100, corner_radius=20, fg_color="#333333", hover_color="#444444", command=self.stop_current_process, state="disabled", font=ctk.CTkFont(weight="bold"))
         self.stop_button.grid(row=0, column=2, padx=(10, 0))
 
         if check_credentials():
@@ -228,9 +250,30 @@ class SpotifyToolkitApp(ctk.CTk):
         """Adds text without an automatic newline, useful for prompts."""
         def _append():
             self.log_textbox.configure(state="normal")
-            self.log_textbox.insert("end", text)
+            
+            # Determine tag based on content
+            tag = None
+            if "✅" in text: tag = "success"
+            elif "❌" in text or "🛑" in text: tag = "error"
+            elif "⚠️" in text: tag = "warning"
+            elif "🚀" in text or "🔍" in text: tag = "info"
+            
+            self.log_textbox.insert("end", text, tag)
             self.log_textbox.configure(state="disabled")
             self.log_textbox.see("end")
+            
+            # Detect progress markers like [PROG:45]
+            if '[' in text or 'PROG' in text:
+                full_content = self.log_textbox.get("end-50c", "end") # check last 50 chars
+                if "PROG:" in full_content:
+                    try:
+                        import re
+                        match = re.search(r'PROG:(\d+)', full_content)
+                        if match:
+                            val = int(match.group(1)) / 100.0
+                            self.progress_bar.set(val)
+                    except:
+                        pass
         self.after(0, _append)
 
     def send_input_to_script(self):
@@ -258,6 +301,7 @@ class SpotifyToolkitApp(ctk.CTk):
             self.send_button.configure(state="normal")
             self.stop_button.configure(state="normal")
             self.command_entry.focus()
+            self.progress_bar.set(0)
             abs_script_path = get_resource_path(script_path)
             self.add_log(f"{T['running']} {os.path.basename(script_path)}")
             
@@ -313,23 +357,34 @@ class SpotifyToolkitApp(ctk.CTk):
 
     def show_home(self):
         self.clear_content_frame()
-        ctk.CTkLabel(self.content_frame, text=T['welcome_title'], font=self.font_title).grid(row=0, column=0, pady=(0, 10), sticky="w")
-        ctk.CTkLabel(self.content_frame, text=T['welcome_desc'], font=self.font_subtitle).grid(row=1, column=0, sticky="nw")
+        ctk.CTkLabel(self.content_frame, text=T['welcome_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 10), sticky="w")
+        ctk.CTkLabel(self.content_frame, text=T['welcome_desc'], font=self.font_subtitle, text_color=self.subtext_color).grid(row=1, column=0, sticky="nw")
 
     def add_tool_button(self, name, desc, path, row):
-        btn = ctk.CTkButton(self.content_frame, text=name, height=40, width=220, command=lambda: self.run_script_thread(path))
-        btn.grid(row=row*2, column=0, pady=(10, 0), sticky="w")
-        lbl = ctk.CTkLabel(self.content_frame, text=desc, font=self.font_desc, text_color="gray70")
-        lbl.grid(row=row*2+1, column=0, padx=(5, 0), pady=(0, 10), sticky="w")
+        # Card container for the tool
+        card = ctk.CTkFrame(self.content_frame, fg_color=self.card_color, corner_radius=10)
+        card.grid(row=row, column=0, pady=5, sticky="ew")
+        card.grid_columnconfigure(0, weight=1)
+
+        lbl_frame = ctk.CTkFrame(card, fg_color="transparent")
+        lbl_frame.grid(row=0, column=0, padx=20, pady=15, sticky="w")
+
+        ctk.CTkLabel(lbl_frame, text=name, font=self.font_subtitle, text_color=self.text_color).pack(anchor="w")
+        ctk.CTkLabel(lbl_frame, text=desc, font=self.font_desc, text_color=self.subtext_color).pack(anchor="w")
+
+        btn = ctk.CTkButton(card, text="RUN", width=80, height=32, corner_radius=16, 
+                            fg_color="#333333", hover_color="#444444", text_color=self.text_color,
+                            command=lambda p=path: self.run_script_thread(p), font=ctk.CTkFont(weight="bold"))
+        btn.grid(row=0, column=1, padx=20, pady=15)
 
     def show_clean(self):
         self.clear_content_frame()
-        ctk.CTkLabel(self.content_frame, text=T['clean_title'], font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        ctk.CTkLabel(self.content_frame, text=T['clean_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
         self.add_tool_button(T['btn_delete_duplicates'], T['desc_delete_duplicates'], "delete_duplicates/delete_duplicates.py", 1)
 
     def show_organize(self):
         self.clear_content_frame()
-        ctk.CTkLabel(self.content_frame, text=T['organize_title'], font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        ctk.CTkLabel(self.content_frame, text=T['organize_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
         tools = [
             (T['btn_separate_genres'], T['desc_separate_genres'], "separate_genres/separate_genres.py"),
             (T['btn_separate_artists'], T['desc_separate_artists'], "separate_artists/separate_artists.py"),
@@ -343,7 +398,7 @@ class SpotifyToolkitApp(ctk.CTk):
 
     def show_stats(self):
         self.clear_content_frame()
-        ctk.CTkLabel(self.content_frame, text=T['stats_title'], font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        ctk.CTkLabel(self.content_frame, text=T['stats_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
         self.add_tool_button(T['btn_top_tracks'], T['desc_top_tracks'], "top_tracks_generator/top_tracks_generator.py", 1)
         self.add_tool_button(T['btn_smart_shuffle'], T['desc_smart_shuffle'], "smart_shuffle/smart_shuffle.py", 2)
 

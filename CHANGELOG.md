@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.7] - 2026-04-16
+
+### Added
+- **📊 Visual Progress Bar**: Integrated a real-time progress bar in the main GUI to track long-running operations.
+- **🎨 Color-coded Logs**: Implemented a system of colored logs (Success in green, Errors in red, Info in blue) for better visual feedback.
+- **📈 Progress Reporting**: Added backend support for reporting progress during track fetching, deletion, and reordering.
+
+### Fixed
+- **🛡️ Network Resilience**: Configured auto-retry and timeout strategies for the Spotify client to better handle connectivity issues.
+- **⚡ Performance Optimization**: Verified and optimized duplicate detection to maintain O(1) performance for playlists with 5,000+ tracks.
+
+---
+
 ## [1.0.6] - 2026-03-17
 
 ### Added
@@ -38,6 +51,19 @@
 ---
 
 # Historial de Cambios (Changelog)
+
+## [1.0.7] - 2026-04-16
+
+### Añadido
+- **📊 Barra de Progreso Visual**: Integración de una barra de progreso en tiempo real en la interfaz principal para tareas largas.
+- **🎨 Logs con Colores**: Implementación de un sistema de colores en el registro (Éxito en verde, Errores en rojo, Info en azul) para una mejor respuesta visual.
+- **📈 Reporte de Avance**: Añadido soporte en los scripts para informar del progreso durante la descarga, borrado y reordenación de canciones.
+
+### Corregido
+- **🛡️ Resiliencia de Red**: Configuración de estrategias de reintento automático y tiempos de espera para gestionar mejor los cortes de conexión.
+- **⚡ Optimización de Rendimiento**: Verificación y optimización de la detección de duplicados para mantener rendimiento O(1) en listas de más de 5.000 canciones.
+
+---
 
 ## [1.0.6] - 2026-03-17
 
