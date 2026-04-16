@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.8] - 2026-04-16
+
+### Added
+- **💎 Premium UI Overhaul**: Complete redesign based on the official Spotify dark aesthetic (#121112 / #000000).
+- **🗂️ Card-Based Layout**: Tools are now organized in clean, interactive cards for better usability.
+- **✨ Iconography Pass**: Refined all menu icons and spacing for pixel-perfect alignment on Windows.
+
+---
+
 ## [1.0.7] - 2026-04-16
 
 ### Added
@@ -51,6 +60,15 @@
 ---
 
 # Historial de Cambios (Changelog)
+
+## [1.0.8] - 2026-04-16
+
+### Añadido
+- **💎 Rediseño Premium**: Rediseño completo de la interfaz basado en la estética oscura oficial de Spotify.
+- **🗂️ Diseño por Tarjetas**: Las herramientas ahora están organizadas en tarjetas interactivas más limpias y fáciles de usar.
+- **✨ Refinado de Iconos**: Ajuste de pixel-perfect en todos los iconos y espaciados del menú lateral.
+
+---
 
 ## [1.0.7] - 2026-04-16
 

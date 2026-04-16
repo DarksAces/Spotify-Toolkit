@@ -175,17 +175,19 @@ class SpotifyToolkitApp(ctk.CTk):
         self.logo_label = ctk.CTkLabel(self.sidebar_frame, text="Toolkit", font=ctk.CTkFont(size=26, weight="bold"), text_color=self.text_color)
         self.logo_label.grid(row=0, column=0, padx=25, pady=(40, 30), sticky="w")
 
-        self.home_button = ctk.CTkButton(self.sidebar_frame, text="🏠 " + T['sidebar_home'], command=self.show_home, fg_color="transparent", text_color=self.subtext_color, hover_color="#282828", anchor="w", font=self.font_sidebar, height=40)
-        self.home_button.grid(row=1, column=0, padx=15, pady=5, sticky="ew")
+        # Utility to create buttons with consistent spacing
+        def make_nav_btn(text, cmd, row):
+            btn = ctk.CTkButton(self.sidebar_frame, text=text, command=cmd, 
+                                fg_color="transparent", text_color=self.subtext_color, 
+                                hover_color="#282828", anchor="w", 
+                                font=self.font_sidebar, height=45, corner_radius=8)
+            btn.grid(row=row, column=0, padx=10, pady=2, sticky="ew")
+            return btn
 
-        self.clean_button = ctk.CTkButton(self.sidebar_frame, text="🧹 " + T['sidebar_clean'], command=self.show_clean, fg_color="transparent", text_color=self.subtext_color, hover_color="#282828", anchor="w", font=self.font_sidebar, height=40)
-        self.clean_button.grid(row=2, column=0, padx=15, pady=5, sticky="ew")
-
-        self.organize_button = ctk.CTkButton(self.sidebar_frame, text="🗂️ " + T['sidebar_organize'], command=self.show_organize, fg_color="transparent", text_color=self.subtext_color, hover_color="#282828", anchor="w", font=self.font_sidebar, height=40)
-        self.organize_button.grid(row=3, column=0, padx=15, pady=5, sticky="ew")
-
-        self.stats_button = ctk.CTkButton(self.sidebar_frame, text="📊 " + T['sidebar_stats'], command=self.show_stats, fg_color="transparent", text_color=self.subtext_color, hover_color="#282828", anchor="w", font=self.font_sidebar, height=40)
-        self.stats_button.grid(row=4, column=0, padx=15, pady=5, sticky="ew")
+        self.home_button = make_nav_btn("  🏠  " + T['sidebar_home'], self.show_home, 1)
+        self.clean_button = make_nav_btn("  ✨  " + T['sidebar_clean'], self.show_clean, 2)
+        self.organize_button = make_nav_btn("  📁  " + T['sidebar_organize'], self.show_organize, 3)
+        self.stats_button = make_nav_btn("  📊  " + T['sidebar_stats'], self.show_stats, 4)
 
         # Main Container
         self.main_frame = ctk.CTkFrame(self, fg_color=self.bg_color)
