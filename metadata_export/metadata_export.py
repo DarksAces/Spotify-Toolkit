@@ -21,23 +21,39 @@ except ImportError:
         scope='user-library-read playlist-read-private'
     ))
 
-def export_to_csv(tracks, filename):
-    keys = ["Name", "Artists", "Album", "Release Date", "Duration", "Popularity", "URI"]
+def export_to_csv(tracks, filename, is_migration=False):
+    if is_migration:
+        # Formato compatible con Soundiiz/TuneMyMusic
+        keys = ["title", "artist", "album", "isrc"]
+    else:
+        keys = ["Name", "Artists", "Album", "Release Date", "Duration", "Popularity", "ISRC", "URI"]
+        
     try:
         with open(filename, 'w', newline='', encoding='utf-8') as output_file:
             dict_writer = csv.DictWriter(output_file, fieldnames=keys)
             dict_writer.writeheader()
             for t in tracks:
                 track = t['track']
-                dict_writer.writerow({
-                    "Name": track['name'],
-                    "Artists": ", ".join([a['name'] for a in track['artists']]),
-                    "Album": track['album']['name'],
-                    "Release Date": track['album']['release_date'],
-                    "Duration": format_duration(track['duration_ms']),
-                    "Popularity": track['popularity'],
-                    "URI": track['uri']
-                })
+                isrc = track.get('external_ids', {}).get('isrc', '')
+                
+                if is_migration:
+                    dict_writer.writerow({
+                        "title": track['name'],
+                        "artist": ", ".join([a['name'] for a in track['artists']]),
+                        "album": track['album']['name'],
+                        "isrc": isrc
+                    })
+                else:
+                    dict_writer.writerow({
+                        "Name": track['name'],
+                        "Artists": ", ".join([a['name'] for a in track['artists']]),
+                        "Album": track['album']['name'],
+                        "Release Date": track['album']['release_date'],
+                        "Duration": format_duration(track['duration_ms']),
+                        "Popularity": track['popularity'],
+                        "ISRC": isrc,
+                        "URI": track['uri']
+                    })
         print(f"✅ Exportado a CSV: {filename}")
     except Exception as e:
         print(f"❌ Error al exportar CSV: {e}")
@@ -54,6 +70,7 @@ def export_to_json(tracks, filename):
             "duration_ms": track['duration_ms'],
             "duration_readable": format_duration(track['duration_ms']),
             "popularity": track['popularity'],
+            "isrc": track.get('external_ids', {}).get('isrc', ''),
             "uri": track['uri']
         })
     try:
@@ -74,9 +91,10 @@ def main():
         return
 
     print("\n¿En qué formato quieres exportar?")
-    print("1: CSV (Compatible con Excel/Sheets)")
-    print("2: JSON (Estándar de datos)")
-    print("3: Ambos")
+    print("1: CSV Estándar (Completo)")
+    print("2: CSV Migración (Soundiiz/TuneMyMusic/Apple/YT)")
+    print("3: JSON (Estándar de datos)")
+    print("4: Todos los anteriores")
     print("q: Cancelar")
 
     choice = input("\nElige una opción: ").strip().lower()
@@ -89,12 +107,14 @@ def main():
         pl_info = sp.playlist(pl_id, fields="name")
         base_name = pl_info['name'].replace(" ", "_").replace("/", "-")
 
-    if choice in ['1', '3']:
+    if choice in ['1', '4']:
         export_to_csv(tracks, f"{base_name}_metadata.csv")
-    if choice in ['2', '3']:
+    if choice in ['2', '4']:
+        export_to_csv(tracks, f"{base_name}_migration.csv", is_migration=True)
+    if choice in ['3', '4']:
         export_to_json(tracks, f"{base_name}_metadata.json")
 
-    if choice not in ['1', '2', '3']:
+    if choice not in ['1', '2', '3', '4']:
         print("❌ Opción no válida.")
 
 if __name__ == "__main__":

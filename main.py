@@ -66,6 +66,8 @@ TEXTS = {
         'desc_separate_artists': "Crea playlists individuales para cada artista encontrado en una lista mixta.",
         'btn_reorder_tracks': "Mover Artista al Final",
         'desc_reorder_tracks': "Mueve todas las canciones de un artista específico al final de la playlist.",
+        'btn_trend_reports': "Informe de Tendencias",
+        'desc_trend_reports': "Genera un informe detallado de tus géneros más escuchados.",
         'btn_artist_extractor': "Extraer Artistas",
         'desc_artist_extractor': "Genera una lista de todos los artistas presentes en una de tus playlists.",
         'btn_playlist_time': "Duración Playlist",
@@ -107,6 +109,8 @@ TEXTS = {
         'desc_separate_artists': "Create individual playlists for each artist found in a mixed list.",
         'btn_reorder_tracks': "Move Artist to End",
         'desc_reorder_tracks': "Move all songs by a specific artist to the end of the playlist.",
+        'btn_trend_reports': "Trend Reports",
+        'desc_trend_reports': "Generate a detailed report of your most listened genres.",
         'btn_artist_extractor': "Extract Artists",
         'desc_artist_extractor': "Generate a list of all artists present in one of your playlists.",
         'btn_playlist_time': "Playlist Duration",
@@ -402,7 +406,8 @@ class SpotifyToolkitApp(ctk.CTk):
         self.clear_content_frame()
         ctk.CTkLabel(self.content_frame, text=T['stats_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
         self.add_tool_button(T['btn_top_tracks'], T['desc_top_tracks'], "top_tracks_generator/top_tracks_generator.py", 1)
-        self.add_tool_button(T['btn_smart_shuffle'], T['desc_smart_shuffle'], "smart_shuffle/smart_shuffle.py", 2)
+        self.add_tool_button(T['btn_trend_reports'], T['desc_trend_reports'], "trend_reports/trend_reports.py", 2)
+        self.add_tool_button(T['btn_smart_shuffle'], T['desc_smart_shuffle'], "smart_shuffle/smart_shuffle.py", 3)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2 and sys.argv[1] == "--run":
