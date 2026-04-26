@@ -14,11 +14,11 @@ a = Analysis(
         ('smart_shuffle', 'smart_shuffle'),
         ('playlist_time', 'playlist_time'),
         ('top_tracks_generator', 'top_tracks_generator'),
-        ('mood_mixer', 'mood_mixer'),
+        ('trend_reports', 'trend_reports'),
         ('metadata_export', 'metadata_export'),
         ('utils', 'utils')
     ],
-    hiddenimports=['spotipy', 'customtkinter', 'difflib'],
+    hiddenimports=['spotipy', 'customtkinter', 'difflib', 'tqdm'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

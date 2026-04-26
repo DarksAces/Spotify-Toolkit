@@ -2,6 +2,7 @@ import os
 import sys
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from tqdm import tqdm
 from collections import defaultdict
 
 # --- CONFIGURACIÓN Y AUTENTICACIÓN ---
@@ -64,21 +65,27 @@ def main():
                         new_pl = sp.user_playlist_create(user_id, "Favoritos Limpios", public=False)
                         all_ids = list(vistos.values())
                         total_to_add = len(all_ids)
-                        for i in range(0, total_to_add, 100):
-                            sp.playlist_add_items(new_pl['id'], all_ids[i:i+100])
-                            # Progreso: empezamos desde 0% en esta fase
-                            percent = int(((i + 100) / total_to_add) * 100)
-                            print(f"PROG:{min(percent, 100)}")
-                            sys.stdout.flush()
+                        with tqdm(total=total_to_add, desc="Creando playlist", unit="track") as pbar:
+                            for i in range(0, total_to_add, 100):
+                                batch = all_ids[i:i+100]
+                                sp.playlist_add_items(new_pl['id'], batch)
+                                pbar.update(len(batch))
+                                # Progreso para la GUI
+                                percent = int(((i + len(batch)) / total_to_add) * 100)
+                                print(f"PROG:{min(percent, 100)}")
+                                sys.stdout.flush()
                         print("✅ Playlist 'Favoritos Limpios' creada.")
                 else:
                     # Borrar de playlist normal
                     total_to_remove = len(to_remove)
-                    for i in range(0, total_to_remove, 100):
-                        sp.playlist_remove_all_occurrences_of_items(pl_id, to_remove[i:i+100])
-                        percent = int(((i + 100) / total_to_remove) * 100)
-                        print(f"PROG:{min(percent, 100)}")
-                        sys.stdout.flush()
+                    with tqdm(total=total_to_remove, desc="Eliminando duplicados", unit="track") as pbar:
+                        for i in range(0, total_to_remove, 100):
+                            batch = to_remove[i:i+100]
+                            sp.playlist_remove_all_occurrences_of_items(pl_id, batch)
+                            pbar.update(len(batch))
+                            percent = int(((i + len(batch)) / total_to_remove) * 100)
+                            print(f"PROG:{min(percent, 100)}")
+                            sys.stdout.flush()
                     print(f"✅ Se han eliminado {len(to_remove)} duplicados de la playlist.")
 
         otra = input("\n¿Quieres limpiar otra playlist? (s/n): ").strip().lower()

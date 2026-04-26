@@ -1,6 +1,7 @@
 import sys
 import os
 import locale
+from tqdm import tqdm
 
 def get_sys_lang():
     try:
@@ -114,27 +115,32 @@ def get_all_tracks(sp, mode, playlist_id=None):
     tracks = []
     try:
         if mode == "liked_songs":
-            print(HT['getting_liked'])
+            desc = HT['getting_liked']
             results = sp.current_user_saved_tracks(limit=50)
             total = results.get('total', 0)
         else:
-            print(HT['getting_playlist'])
+            desc = HT['getting_playlist']
             results = sp.playlist_tracks(playlist_id)
             total = results.get('total', 0)
         
         fetched = 0
-        while results:
-            items = results.get('items', [])
-            tracks.extend(items)
-            fetched += len(items)
-            
-            # Reportar progreso
-            if total > 0:
-                percent = int((fetched / total) * 100)
-                print(f"PROG:{percent}")
-                sys.stdout.flush()
+        with tqdm(total=total, desc=desc, unit="track", leave=False) as pbar:
+            while results:
+                items = results.get('items', [])
+                tracks.extend(items)
+                fetched += len(items)
+                pbar.update(len(items))
+                
+                # Reportar progreso para la GUI
+                if total > 0:
+                    percent = int((fetched / total) * 100)
+                    # Usamos print normal para tqdm y sys.stderr para la GUI si es necesario?
+                    # No, la GUI lee stdout. Tqdm escribe en stderr por defecto.
+                    # Vamos a imprimir el progreso para la GUI en stdout.
+                    print(f"PROG:{percent}")
+                    sys.stdout.flush()
 
-            results = sp.next(results) if results.get('next') else None
+                results = sp.next(results) if results.get('next') else None
     except Exception as e:
         print(f"⚠️ Error al obtener canciones: {e}")
     

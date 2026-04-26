@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.9] - 2026-04-26
+
+### Added
+- **🚀 CLI Progress Bars**: Integrated `tqdm` for real-time visual feedback in the terminal for all long-running operations (fetching tracks, processing artists, shuffling, etc.).
+
+### Fixed
+- **🧹 Code Cleanup**: Resolved merge conflicts and cleaned up logic in `reorder_tracks.py`.
+- **🛠️ Robustness**: Improved progress tracking accuracy across all modules.
+
+---
+
 ## [1.0.8] - 2026-04-16
 
 ### Added
@@ -60,6 +71,17 @@
 ---
 
 # Historial de Cambios (Changelog)
+
+## [1.0.9] - 2026-04-26
+
+### Añadido
+- **🚀 Barras de Progreso en CLI**: Integración de `tqdm` para ofrecer retroalimentación visual en tiempo real en la terminal durante operaciones largas (descarga de canciones, análisis de artistas, mezclas, etc.).
+
+### Corregido
+- **🧹 Limpieza de Código**: Resolución de conflictos de fusión y limpieza de lógica en `reorder_tracks.py`.
+- **🛠️ Robustez**: Mejora en la precisión del seguimiento de progreso en todos los módulos.
+
+---
 
 ## [1.0.8] - 2026-04-16
 

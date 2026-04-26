@@ -4,6 +4,7 @@ import sys
 from spotipy.oauth2 import SpotifyOAuth
 from collections import Counter
 import time
+from tqdm import tqdm
 
 # --- CONFIGURACIÓN Y AUTENTICACIÓN ---
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -26,18 +27,23 @@ def obtener_datos_playlist(playlist_id, playlist_name):
     
     nombres_artistas = []
     offset = 0
-    while True:
-        resultados = sp.playlist_tracks(playlist_id, offset=offset)
-        tracks = resultados['items']
-        
-        for item in tracks:
-            if item and item.get('track') and item['track'].get('artists'):
-                for artist in item['track']['artists']:
-                    nombres_artistas.append(artist['name'])
-        
-        print(f"   ∟ Procesadas {len(nombres_artistas)} entradas de artistas...")
-        if not resultados['next']: break
-        offset += len(tracks)
+    # Obtenemos el total primero
+    res_info = sp.playlist_tracks(playlist_id, limit=1, fields="total")
+    total_tracks = res_info['total']
+    
+    with tqdm(total=total_tracks, desc="Extrayendo artistas", unit="track") as pbar:
+        while offset < total_tracks:
+            resultados = sp.playlist_tracks(playlist_id, offset=offset)
+            tracks = resultados['items']
+            
+            for item in tracks:
+                if item and item.get('track') and item['track'].get('artists'):
+                    for artist in item['track']['artists']:
+                        nombres_artistas.append(artist['name'])
+            
+            pbar.update(len(tracks))
+            if not resultados['next']: break
+            offset += len(tracks)
     
     return nombres_artistas
 

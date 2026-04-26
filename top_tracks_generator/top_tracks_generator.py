@@ -3,6 +3,7 @@ import random
 import spotipy
 import sys
 from spotipy.oauth2 import SpotifyOAuth
+from tqdm import tqdm
 from difflib import SequenceMatcher
 
 # --- CONFIGURACIÓN Y AUTENTICACIÓN ---
@@ -110,8 +111,11 @@ def generar_playlist_artistas():
     if not nombre_pl: nombre_pl = "Mix de Artistas Seleccionados"
     
     nueva_pl = sp.user_playlist_create(user_id, nombre_pl)
-    for i in range(0, len(todas_uris), 100):
-        sp.playlist_add_items(nueva_pl['id'], todas_uris[i:i+100])
+    with tqdm(total=len(todas_uris), desc="Creando playlist", unit="track") as pbar:
+        for i in range(0, len(todas_uris), 100):
+            batch = todas_uris[i:i+100]
+            sp.playlist_add_items(nueva_pl['id'], batch)
+            pbar.update(len(batch))
     
     print(f"✅ ¡Hecho! Playlist '{nombre_pl}' creada.")
 

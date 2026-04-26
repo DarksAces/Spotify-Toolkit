@@ -3,6 +3,7 @@ import random
 import spotipy
 import sys
 from spotipy.oauth2 import SpotifyOAuth
+from tqdm import tqdm
 
 # --- CONFIGURACIÓN Y AUTENTICACIÓN ---
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -27,20 +28,24 @@ def mezclar_flexible(tracks, max_intentos=5000):
     mejor_mezcla = list(tracks)
     min_colisiones = len(tracks)
 
-    for intento in range(max_intentos):
-        random.shuffle(tracks)
-        colisiones = 0
-        for i in range(1, len(tracks)):
-            if tracks[i]['artist'] == tracks[i-1]['artist'] or tracks[i]['album'] == tracks[i-1]['album']:
-                colisiones += 1
-        
-        if colisiones == 0:
-            print(f"   ∟ Mezcla perfecta encontrada en intento {intento+1}!")
-            return tracks
-        
-        if colisiones < min_colisiones:
-            min_colisiones = colisiones
-            mejor_mezcla = list(tracks)
+    with tqdm(total=max_intentos, desc="Calculando mejor mezcla", unit="intento") as pbar:
+        for intento in range(max_intentos):
+            random.shuffle(tracks)
+            colisiones = 0
+            for i in range(1, len(tracks)):
+                if tracks[i]['artist'] == tracks[i-1]['artist'] or tracks[i]['album'] == tracks[i-1]['album']:
+                    colisiones += 1
+            
+            if colisiones == 0:
+                pbar.update(max_intentos - intento)
+                print(f"   ∟ Mezcla perfecta encontrada en intento {intento+1}!")
+                return tracks
+            
+            if colisiones < min_colisiones:
+                min_colisiones = colisiones
+                mejor_mezcla = list(tracks)
+            
+            pbar.update(1)
             
     print(f"   ⚠️ No se encontró una mezcla perfecta. Usando la mejor (colisiones: {min_colisiones})")
     return mejor_mezcla
@@ -55,19 +60,27 @@ def main():
         canciones = []
         offset = 0
         print(f"🔍 Cargando canciones...")
-        while True:
-            res = sp.playlist_items(pl_id, offset=offset, fields="items.track(uri,artists,album(name)),next")
-            for item in res['items']:
-                track = item['track']
-                if track and track['uri'] and track['artists']:
-                    canciones.append({
-                        "uri": track['uri'],
-                        "artist": track['artists'][0]['name'],
-                        "album": track['album']['name']
-                    })
-            if not res['next']: break
-            offset += len(res['items'])
-            print(f"   ∟ Obtenidas {len(canciones)} canciones...")
+        # Primero obtenemos el total
+        res_info = sp.playlist_items(pl_id, limit=1, fields="total")
+        total_items = res_info['total']
+        
+        with tqdm(total=total_items, desc="Cargando tracks", unit="track") as pbar:
+            while offset < total_items:
+                res = sp.playlist_items(pl_id, offset=offset, fields="items.track(uri,artists,album(name)),next")
+                items_fetched = 0
+                for item in res['items']:
+                    track = item['track']
+                    if track and track['uri'] and track['artists']:
+                        canciones.append({
+                            "uri": track['uri'],
+                            "artist": track['artists'][0]['name'],
+                            "album": track['album']['name']
+                        })
+                    items_fetched += 1
+                
+                pbar.update(items_fetched)
+                offset += len(res['items'])
+                if not res['next']: break
         
         if not canciones:
             print("❌ La playlist está vacía.")
@@ -81,8 +94,12 @@ def main():
         
         # Spotify permite añadir hasta 100 de golpe. Replace_items también.
         sp.playlist_replace_items(pl_id, uris[:100])
-        for i in range(100, len(uris), 100):
-            sp.playlist_add_items(pl_id, uris[i:i+100])
+        with tqdm(total=len(uris), desc="Actualizando Spotify", unit="track") as pbar:
+            pbar.update(min(100, len(uris)))
+            for i in range(100, len(uris), 100):
+                batch = uris[i:i+100]
+                sp.playlist_add_items(pl_id, batch)
+                pbar.update(len(batch))
         
         print(f"✅ ¡Hecho! La playlist ha sido mezclada.")
         
