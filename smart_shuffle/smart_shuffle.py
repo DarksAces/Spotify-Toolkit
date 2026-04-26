@@ -11,7 +11,7 @@ sys.path.append(project_root)
 
 try:
     from utils.auth import get_spotify_client
-    from utils.helpers import select_playlist
+    from utils.helpers import select_playlist, get_all_tracks
     sp = get_spotify_client()
 except ImportError:
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
@@ -53,52 +53,51 @@ def mezclar_flexible(tracks, max_intentos=5000):
 def main():
     while True:
         print("\n=== SMART SHUFFLE (Mezcla inteligente) ===")
-        mode, pl_id = select_playlist(sp, "Elige la playlist para mezclar")
+        mode, pl_id = select_playlist(sp, "Elige la playlist para mezclar", include_liked=True)
         
         if not mode: break
         
-        canciones = []
-        offset = 0
-        print(f"🔍 Cargando canciones...")
-        # Primero obtenemos el total
-        res_info = sp.playlist_items(pl_id, limit=1, fields="total")
-        total_items = res_info['total']
-        
-        with tqdm(total=total_items, desc="Cargando tracks", unit="track") as pbar:
-            while offset < total_items:
-                res = sp.playlist_items(pl_id, offset=offset, fields="items.track(uri,artists,album(name)),next")
-                items_fetched = 0
-                for item in res['items']:
-                    track = item['track']
-                    if track and track['uri'] and track['artists']:
-                        canciones.append({
-                            "uri": track['uri'],
-                            "artist": track['artists'][0]['name'],
-                            "album": track['album']['name']
-                        })
-                    items_fetched += 1
-                
-                pbar.update(items_fetched)
-                offset += len(res['items'])
-                if not res['next']: break
-        
-        if not canciones:
-            print("❌ La playlist está vacía.")
+        tracks_raw = get_all_tracks(sp, mode, pl_id)
+        if not tracks_raw:
+            print("❌ La lista está vacía.")
             continue
+
+        canciones = []
+        for item in tracks_raw:
+            track = item['track']
+            if track and track['uri'] and track['artists']:
+                canciones.append({
+                    "uri": track['uri'],
+                    "artist": track['artists'][0]['name'],
+                    "album": track['album']['name']
+                })
 
         mezcladas = mezclar_flexible(canciones)
         
         print("📤 Actualizando playlist en Spotify...")
-        # Usamos replace_items porque es más eficiente para limpiar y rellenar
         uris = [t['uri'] for t in mezcladas]
         
-        # Spotify permite añadir hasta 100 de golpe. Replace_items también.
-        sp.playlist_replace_items(pl_id, uris[:100])
+        if mode == "liked_songs":
+            print("⚠️ La API de Spotify no permite reordenar 'Liked Songs' directamente.")
+            print("Creando una nueva playlist 'Smart Shuffle Liked'...")
+            user_id = sp.me()['id']
+            new_pl = sp.user_playlist_create(user_id, "Smart Shuffle Liked", public=False)
+            target_pl_id = new_pl['id']
+            # Para Liked Songs no usamos replace_items sino add_items
+            first_batch = uris[:100]
+            sp.playlist_add_items(target_pl_id, first_batch)
+            start_idx = 100
+        else:
+            target_pl_id = pl_id
+            # Usamos replace_items porque es más eficiente para limpiar y rellenar
+            sp.playlist_replace_items(target_pl_id, uris[:100])
+            start_idx = 100
+
         with tqdm(total=len(uris), desc="Actualizando Spotify", unit="track") as pbar:
             pbar.update(min(100, len(uris)))
-            for i in range(100, len(uris), 100):
+            for i in range(start_idx, len(uris), 100):
                 batch = uris[i:i+100]
-                sp.playlist_add_items(pl_id, batch)
+                sp.playlist_add_items(target_pl_id, batch)
                 pbar.update(len(batch))
         
         print(f"✅ ¡Hecho! La playlist ha sido mezclada.")

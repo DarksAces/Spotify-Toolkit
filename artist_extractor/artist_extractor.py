@@ -12,7 +12,7 @@ sys.path.append(project_root)
 
 try:
     from utils.auth import get_spotify_client
-    from utils.helpers import select_playlist
+    from utils.helpers import select_playlist, get_all_tracks
     sp = get_spotify_client()
 except ImportError:
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
@@ -22,41 +22,30 @@ except ImportError:
         scope='user-library-read playlist-read-private'
     ))
 
-def obtener_datos_playlist(playlist_id, playlist_name):
-    print(f"\n[INFO] Analizando playlist: {playlist_name} ⏳")
-    
+def obtener_datos_artistas(tracks):
+    """Extrae los nombres de los artistas de una lista de tracks."""
     nombres_artistas = []
-    offset = 0
-    # Obtenemos el total primero
-    res_info = sp.playlist_tracks(playlist_id, limit=1, fields="total")
-    total_tracks = res_info['total']
-    
-    with tqdm(total=total_tracks, desc="Extrayendo artistas", unit="track") as pbar:
-        while offset < total_tracks:
-            resultados = sp.playlist_tracks(playlist_id, offset=offset)
-            tracks = resultados['items']
-            
-            for item in tracks:
-                if item and item.get('track') and item['track'].get('artists'):
-                    for artist in item['track']['artists']:
-                        nombres_artistas.append(artist['name'])
-            
-            pbar.update(len(tracks))
-            if not resultados['next']: break
-            offset += len(tracks)
-    
+    for item in tracks:
+        if item and item.get('track') and item['track'].get('artists'):
+            for artist in item['track']['artists']:
+                nombres_artistas.append(artist['name'])
     return nombres_artistas
 
 def main():
     while True:
         print("\n=== ARTIST EXTRACTOR (Estadísticas de Artistas) ===")
-        mode, pl_id = select_playlist(sp, "Elige una playlist para analizar")
+        mode, pl_id = select_playlist(sp, "Elige una playlist para analizar", include_liked=True)
         
         if not mode: break
         
-        nombres = obtener_datos_playlist(pl_id, "la lista seleccionada")
+        tracks = get_all_tracks(sp, mode, pl_id)
+        if not tracks:
+            print("❌ No se encontraron canciones.")
+            continue
+
+        nombres = obtener_datos_artistas(tracks)
         if not nombres:
-            print("❌ No se encontraron artistas en esta playlist.")
+            print("❌ No se encontraron artistas en esta lista.")
             continue
             
         conteo = Counter(nombres)
@@ -67,7 +56,8 @@ def main():
             print(f"   ∟ {art}: {count} canciones")
         
         # Guardar en archivo
-        nombre_archivo = f"artistas_{pl_id}.txt"
+        file_id = pl_id if pl_id else "liked_songs"
+        nombre_archivo = f"artistas_{file_id}.txt"
         
         try:
             with open(nombre_archivo, "w", encoding="utf-8") as f:
