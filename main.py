@@ -11,6 +11,8 @@ import locale
 import re
 from PIL import Image
 from dotenv import load_dotenv
+import tqdm
+import spotipy
 
 # --- CORRECCIÓN DE CODIFICACIÓN PARA EMOJIS EN WINDOWS ---
 if sys.stdout is not None and hasattr(sys.stdout, 'reconfigure'):

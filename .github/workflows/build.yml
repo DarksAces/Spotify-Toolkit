@@ -25,7 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller spotipy python-dotenv customtkinter pillow darkdetect
+        pip install pyinstaller spotipy python-dotenv customtkinter pillow darkdetect tqdm
 
     - name: Build EXE with Secrets
       shell: pwsh
@@ -54,7 +54,7 @@ jobs:
             "smart_shuffle", "Shuffle",
             "playlist_time", "Playlist Time",
             "top_tracks_generator", "Top Tracks Generator",
-            "mood_mixer", "Mood Mixer",
+            "trend_reports", "trend_reports",
             "metadata_export", "metadata_export",
             "utils", "utils"
         )
@@ -85,6 +85,7 @@ jobs:
           --hidden-import=PIL.Image `
           --hidden-import=PIL.ImageTk `
           --hidden-import=darkdetect `
+          --hidden-import=tqdm `
           @dataArgs `
           main_build.py
 
