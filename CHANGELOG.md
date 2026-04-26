@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0] - 2026-04-26
+
+### Added
+- **🎵 Full "Liked Songs" Support**: Unified track fetching logic across the entire toolkit. Now you can use your favorite songs in all tools, including Smart Shuffle and Artist Extractor.
+- **🛠️ Build System Overhaul**: Updated GitHub Actions and PyInstaller configuration to ensure all dependencies (like `tqdm`) are correctly bundled.
+- **🛡️ Credential Robustness**: Improved `.env` loading to handle accidental spaces and quotes.
+
+### Fixed
+- **🧹 Bug Fixes**: Resolved merge conflicts in `reorder_tracks.py` and improved progress reporting accuracy.
+
+---
+
 ## [1.0.9] - 2026-04-26
 
 ### Added
@@ -71,6 +83,18 @@
 ---
 
 # Historial de Cambios (Changelog)
+
+## [1.1.0] - 2026-04-26
+
+### Añadido
+- **🎵 Soporte Completo de "Liked Songs"**: Unificada la lógica de obtención de canciones en todo el toolkit. Ahora puedes usar tus canciones favoritas en todas las herramientas, incluyendo Smart Shuffle y Artist Extractor.
+- **🛠️ Mejora del Sistema de Build**: Actualizada la GitHub Action y la configuración de PyInstaller para asegurar que todas las librerías (como `tqdm`) se incluyan correctamente.
+- **🛡️ Robustez de Credenciales**: Mejora en la carga del archivo `.env` para gestionar espacios y comillas accidentales.
+
+### Corregido
+- **🧹 Corrección de Errores**: Resolución de conflictos en `reorder_tracks.py` y mejora en la precisión de las barras de progreso.
+
+---
 
 ## [1.0.9] - 2026-04-26
 
