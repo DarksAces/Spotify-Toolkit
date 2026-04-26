@@ -138,7 +138,7 @@ TEXTS = {
 T = TEXTS[LANG]
 
 # --- SISTEMA DE CREDENCIALES PLUG & PLAY ---
-load_dotenv() 
+load_dotenv() # [CREDENTIALS_MARKER]
 
 def check_credentials():
     return all([os.getenv('SPOTIFY_CLIENT_ID'), os.getenv('SPOTIFY_CLIENT_SECRET'), os.getenv('SPOTIFY_REDIRECT_URI')])
