@@ -20,7 +20,11 @@ def main_menu():
         "6": ("Smart Shuffle", "smart_shuffle/smart_shuffle.py"),
         "7": ("Playlist Duration (Time)", "playlist_time/playlist_time.py"),
         "8": ("Reorder Tracks", "reorder_tracks/reorder_tracks.py"),
-        "9": ("Mood Mixer", "mood_mixer/mood_mixer.py")
+        "9": ("Trend Reports", "trend_reports/trend_reports.py"),
+        "10": ("Metadata Export", "metadata_export/metadata_export.py"),
+        "11": ("Playlist Merger", "playlist_merger/playlist_merger.py"),
+        "12": ("Mood Mixer", "mood_mixer/mood_mixer.py"),
+        "13": ("Library Backup", "library_backup/library_backup.py")
     }
 
     while True:

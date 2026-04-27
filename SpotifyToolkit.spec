@@ -1,6 +1,11 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 
+import customtkinter
+import os
+
+ctk_path = os.path.dirname(customtkinter.__file__)
+
 a = Analysis(
     ['main.py'],
     pathex=[],
@@ -16,13 +21,17 @@ a = Analysis(
         ('top_tracks_generator', 'top_tracks_generator'),
         ('mood_mixer', 'mood_mixer'),
         ('metadata_export', 'metadata_export'),
-        ('utils', 'utils')
+        ('utils', 'utils'),
+        (ctk_path, 'customtkinter'),
+        ('playlist_merger', 'playlist_merger'),
+        ('mood_mixer', 'mood_mixer'),
+        ('library_backup', 'library_backup')
     ],
     hiddenimports=['spotipy', 'customtkinter', 'difflib'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['torch', 'numpy', 'scipy', 'matplotlib', 'pandas', 'tensorflow', 'onnxruntime', 'torchvision', 'lxml', 'fsspec', 'imageio', 'ffmpeg', 'cv2', 'IPython', 'PIL.ImageQt'],
     noarchive=False,
     optimize=0,
 )

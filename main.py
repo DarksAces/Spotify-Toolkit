@@ -46,18 +46,24 @@ LANG = get_system_lang()
 
 TEXTS = {
     'es': {
+<<<<<<< Updated upstream
         'title': "Spotify Toolkit v1.0.6",
+=======
+        'title': "Spotify Toolkit v1.2.0",
+>>>>>>> Stashed changes
         'sidebar_home': "Inicio",
         'sidebar_clean': "Limpieza",
         'sidebar_organize': "Organizar",
+        'sidebar_utils': "Herramientas",
         'sidebar_stats': "Estadísticas",
         'ready': "✅ Sistema listo",
         'no_creds': "⚠️ Credenciales no encontradas (.env)",
         'welcome_title': "Spotify Toolkit",
         'welcome_desc': "Tus herramientas están listas. Elige una del menú lateral.",
-        'clean_title': "Limpieza profunda",
+        'clean_title': "Limpieza y Orden",
         'organize_title': "Organización",
-        'stats_title': "Estadísticas y Mezcla",
+        'utils_title': "Utilidades y Respaldo",
+        'stats_title': "Estadísticas y Análisis",
         'btn_delete_duplicates': "Borrar Duplicados",
         'desc_delete_duplicates': "Busca y elimina canciones repetidas en tus playlists para mantenerlas limpias.",
         'btn_separate_genres': "Separar por Géneros",
@@ -77,7 +83,17 @@ TEXTS = {
         'btn_smart_shuffle': "Smart Shuffle",
         'desc_smart_shuffle': "Mezcla tus listas evitando que suenen dos canciones seguidas del mismo artista.",
         'btn_metadata_export': "Exportar Metadatos",
+<<<<<<< Updated upstream
         'desc_metadata_export': "Exporta una playlist a CSV o JSON para usar en otras plataformas.",
+=======
+        'desc_metadata_export': "Exporta una playlist a CSV o JSON.",
+        'btn_playlist_merger': "Fusionar Playlists",
+        'desc_playlist_merger': "Une varias listas en una nueva.",
+        'btn_mood_mixer': "Mood Mixer",
+        'desc_mood_mixer': "Mezcla por estado de ánimo.",
+        'btn_library_backup': "Copia de Seguridad",
+        'desc_library_backup': "Respalda toda tu biblioteca.",
+>>>>>>> Stashed changes
         'input_placeholder': "Escribir aquí...",
         'btn_send': "Enviar",
         'btn_cancel': "Cancelar",
@@ -89,18 +105,24 @@ TEXTS = {
         'error_fatal': "❌ Error fatal en script: "
     },
     'en': {
+<<<<<<< Updated upstream
         'title': "Spotify Toolkit v1.0.6",
+=======
+        'title': "Spotify Toolkit v1.2.0",
+>>>>>>> Stashed changes
         'sidebar_home': "Home",
         'sidebar_clean': "Clean",
         'sidebar_organize': "Organize",
+        'sidebar_utils': "Utilities",
         'sidebar_stats': "Statistics",
         'ready': "✅ System ready",
         'no_creds': "⚠️ Credentials not found (.env)",
         'welcome_title': "Spotify Toolkit",
         'welcome_desc': "Your tools are ready. Choose one from the sidebar.",
-        'clean_title': "Deep Cleaning",
+        'clean_title': "Cleaning & Order",
         'organize_title': "Organization",
-        'stats_title': "Stats & Mixing",
+        'utils_title': "Utilities & Backup",
+        'stats_title': "Stats & Analysis",
         'btn_delete_duplicates': "Delete Duplicates",
         'desc_delete_duplicates': "Find and remove repeated songs in your playlists to keep them clean.",
         'btn_separate_genres': "Separate by Genres",
@@ -120,7 +142,17 @@ TEXTS = {
         'btn_smart_shuffle': "Smart Shuffle",
         'desc_smart_shuffle': "Shuffle your lists while avoiding two songs from the same artist in a row.",
         'btn_metadata_export': "Export Metadata",
+<<<<<<< Updated upstream
         'desc_metadata_export': "Export a playlist to CSV or JSON for use on other platforms.",
+=======
+        'desc_metadata_export': "Export to CSV or JSON.",
+        'btn_playlist_merger': "Playlist Merger",
+        'desc_playlist_merger': "Combine multiple lists into a new one.",
+        'btn_mood_mixer': "Mood Mixer",
+        'desc_mood_mixer': "Mix based on your mood.",
+        'btn_library_backup': "Library Backup",
+        'desc_library_backup': "Backup your entire library.",
+>>>>>>> Stashed changes
         'input_placeholder': "Type here...",
         'btn_send': "Send",
         'btn_cancel': "Cancel",
@@ -191,7 +223,8 @@ class SpotifyToolkitApp(ctk.CTk):
         self.home_button = make_nav_btn("  🏠  " + T['sidebar_home'], self.show_home, 1)
         self.clean_button = make_nav_btn("  ✨  " + T['sidebar_clean'], self.show_clean, 2)
         self.organize_button = make_nav_btn("  📁  " + T['sidebar_organize'], self.show_organize, 3)
-        self.stats_button = make_nav_btn("  📊  " + T['sidebar_stats'], self.show_stats, 4)
+        self.utils_button = make_nav_btn("  🛠️  " + T['sidebar_utils'], self.show_utils, 4)
+        self.stats_button = make_nav_btn("  📊  " + T['sidebar_stats'], self.show_stats, 5)
 
         # Main Container
         self.main_frame = ctk.CTkFrame(self, fg_color=self.bg_color)
@@ -387,17 +420,28 @@ class SpotifyToolkitApp(ctk.CTk):
         self.clear_content_frame()
         ctk.CTkLabel(self.content_frame, text=T['clean_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
         self.add_tool_button(T['btn_delete_duplicates'], T['desc_delete_duplicates'], "delete_duplicates/delete_duplicates.py", 1)
+        self.add_tool_button(T['btn_smart_shuffle'], T['desc_smart_shuffle'], "smart_shuffle/smart_shuffle.py", 2)
 
     def show_organize(self):
         self.clear_content_frame()
         ctk.CTkLabel(self.content_frame, text=T['organize_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
         tools = [
             (T['btn_separate_genres'], T['desc_separate_genres'], "separate_genres/separate_genres.py"),
-            (T['btn_separate_artists'], T['desc_separate_artists'], "separate_artists/separate_artists.py"),
-            (T['btn_reorder_tracks'], T['desc_reorder_tracks'], "reorder_tracks/reorder_tracks.py"),
-            (T['btn_artist_extractor'], T['desc_artist_extractor'], "artist_extractor/artist_extractor.py"),
+            (T['btn_separate_artists'], T['desc_separate_artists'], "separate_artists/separate_artists.py")
+        ]
+        for i, (name, desc, path) in enumerate(tools):
+            self.add_tool_button(name, desc, path, i+1)
+
+    def show_utils(self):
+        self.clear_content_frame()
+        ctk.CTkLabel(self.content_frame, text=T['utils_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        tools = [
+            (T['btn_metadata_export'], T['desc_metadata_export'], "metadata_export/metadata_export.py"),
+            (T['btn_library_backup'], T['desc_library_backup'], "library_backup/library_backup.py"),
+            (T['btn_playlist_merger'], T['desc_playlist_merger'], "playlist_merger/playlist_merger.py"),
             (T['btn_playlist_time'], T['desc_playlist_time'], "playlist_time/playlist_time.py"),
-            (T['btn_metadata_export'], T['desc_metadata_export'], "metadata_export/metadata_export.py")
+            (T['btn_artist_extractor'], T['desc_artist_extractor'], "artist_extractor/artist_extractor.py"),
+            (T['btn_reorder_tracks'], T['desc_reorder_tracks'], "reorder_tracks/reorder_tracks.py")
         ]
         for i, (name, desc, path) in enumerate(tools):
             self.add_tool_button(name, desc, path, i+1)
@@ -407,7 +451,7 @@ class SpotifyToolkitApp(ctk.CTk):
         ctk.CTkLabel(self.content_frame, text=T['stats_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
         self.add_tool_button(T['btn_top_tracks'], T['desc_top_tracks'], "top_tracks_generator/top_tracks_generator.py", 1)
         self.add_tool_button(T['btn_trend_reports'], T['desc_trend_reports'], "trend_reports/trend_reports.py", 2)
-        self.add_tool_button(T['btn_smart_shuffle'], T['desc_smart_shuffle'], "smart_shuffle/smart_shuffle.py", 3)
+        self.add_tool_button(T['btn_mood_mixer'], T['desc_mood_mixer'], "mood_mixer/mood_mixer.py", 3)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2 and sys.argv[1] == "--run":
@@ -417,6 +461,9 @@ if __name__ == "__main__":
             if hasattr(sys, '_MEIPASS'):
                 sys.path.append(sys._MEIPASS)
             try:
+                # Limpiamos sys.argv para que el script hijo no reciba los argumentos del padre (--run)
+                original_argv = sys.argv[:]
+                sys.argv = [target_script] + sys.argv[3:]
                 runpy.run_path(target_script, run_name="__main__")
             except Exception as e:
                 print(f"{T['error_fatal']}{e}")
