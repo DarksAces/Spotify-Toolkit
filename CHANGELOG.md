@@ -1,20 +1,14 @@
 # Changelog
 
-## [1.2.0] - 2026-04-27
-
-### Added
-- **🛠️ New Tools Category**: Added a dedicated "Utilities" section in the GUI to better organize the toolkit.
-- **🔗 Playlist Merger**: New tool to combine multiple playlists into a new one, with duplicate detection.
-- **🎭 Mood Mixer**: Filter any playlist by audio features (Energy, Chill, Danceable, Happy) using Spotify's AI analysis.
-- **💾 Library Backup**: One-click full backup of all your playlists and Liked Songs to JSON files.
-- **🐛 CLI/GUI Fix**: Resolved a critical bug where sub-scripts would fail to parse arguments when launched from the GUI.
-
 ## [1.1.1] - 2026-04-27
 
 ### Added
-- **📤 Enhanced Metadata Export**: Added CLI arguments support to the export tool. You can now specify playlist IDs and formats via command line.
-- **📄 Robust Data Flattening**: Improved CSV export with better flattening of nested Spotify data (Artists, Albums, ISRC, etc.) for better Excel compatibility.
-- **🖥️ CLI Menu Expansion**: Integrated Metadata Export and Trend Reports into the CLI menu (`cli_menu.py`).
+- **🎨 UI Redesign**: New card-based grid layout, active navigation indicators, and dark mode adjustments.
+- **🛠️ New Tools**: Playlist Merger, Mood Mixer, and Library Backup.
+- **📤 Enhanced Metadata Export**: Added CLI arguments and data flattening for CSV/JSON.
+- **📁 Centralized Exports**: Files are now saved in a dedicated `exports/` folder.
+- **🌍 Dynamic i18n**: Language toggle (EN/ES) in the sidebar.
+- **🐛 CLI/GUI Fix**: Resolved bug in sub-script argument parsing.
 
 ## [1.1.0] - 2026-04-26
 
@@ -57,21 +51,15 @@
 
 # Historial de Cambios (Changelog)
 
-## [1.2.0] - 2026-04-27
-
-### Añadido
-- **🛠️ Nueva Categoría de Herramientas**: Sección dedicada de "Herramientas" en la interfaz para una mejor organización.
-- **🔗 Fusionador de Playlists**: Nueva herramienta para combinar varias listas en una nueva, con detección de duplicados.
-- **🎭 Mood Mixer**: Filtra cualquier playlist por características de audio (Energética, Relajada, Bailable, Feliz).
-- **💾 Respaldo de Biblioteca**: Copia de seguridad completa de todas tus playlists y canciones favoritas a archivos JSON en un solo clic.
-- **🐛 Corrección CLI/GUI**: Solucionado un error crítico donde los sub-scripts fallaban al procesar argumentos al lanzarse desde la interfaz.
-
 ## [1.1.1] - 2026-04-27
 
 ### Añadido
-- **📤 Exportación de Metadatos Mejorada**: Soporte para argumentos de línea de comandos en la herramienta de exportación. Ahora puedes especificar IDs de playlist y formatos vía CLI.
-- **📄 Aplanamiento de Datos Robusto**: Mejora en la exportación CSV con un mejor aplanamiento de los datos anidados de Spotify (Artistas, Álbumes, ISRC, etc.) para una mejor compatibilidad con Excel.
-- **🖥️ Expansión del Menú CLI**: Integración de la Exportación de Metadatos e Informe de Tendencias en el menú de consola (`cli_menu.py`).
+- **🎨 Rediseño de Interfaz**: Nuevo diseño de tarjetas en cuadrícula, indicadores de navegación y ajustes de tema oscuro.
+- **🛠️ Nuevas Herramientas**: Fusionador de Playlists, Mood Mixer y Respaldo de Biblioteca.
+- **📤 Exportación Mejorada**: Soporte CLI y aplanamiento de datos para CSV/JSON.
+- **📁 Exportaciones Centralizadas**: Carpeta `exports/` dedicada para los archivos generados.
+- **🌍 i18n Dinámico**: Cambio de idioma (EN/ES) en la barra lateral.
+- **🐛 Corrección CLI/GUI**: Solucionado error de argumentos en scripts secundarios.
 
 ## [1.1.0] - 2026-04-26
 

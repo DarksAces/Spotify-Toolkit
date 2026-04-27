@@ -48,7 +48,7 @@ LANG = get_system_lang()
 
 TEXTS = {
     'es': {
-        'title': "Spotify Toolkit v1.2.0",
+        'title': "Spotify Toolkit v1.1.1",
         'sidebar_home': "Inicio",
         'sidebar_clean': "Limpieza",
         'sidebar_organize': "Organizar",
@@ -99,7 +99,7 @@ TEXTS = {
         'error_fatal': "❌ Error fatal en script: "
     },
     'en': {
-        'title': "Spotify Toolkit v1.2.0",
+        'title': "Spotify Toolkit v1.1.1",
         'sidebar_home': "Home",
         'sidebar_clean': "Clean",
         'sidebar_organize': "Organize",
