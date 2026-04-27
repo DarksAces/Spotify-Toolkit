@@ -3,6 +3,29 @@ import os
 import locale
 from tqdm import tqdm
 
+def get_export_dir():
+    """
+    Retorna la ruta absoluta de la carpeta 'exports'.
+    Si se ejecuta como EXE, usa la ruta del ejecutable.
+    Si se ejecuta como script, usa la raíz del proyecto.
+    """
+    if hasattr(sys, '_MEIPASS'):
+        # PyInstaller: Directorio del ejecutable (.exe)
+        base_path = os.path.dirname(sys.executable)
+    else:
+        # Script: Raíz del proyecto (subiendo un nivel desde utils/)
+        base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    
+    export_path = os.path.join(base_path, "exports")
+    if not os.path.exists(export_path):
+        try:
+            os.makedirs(export_path, exist_ok=True)
+        except:
+            # Fallback a directorio actual si no hay permisos
+            return os.getcwd()
+            
+    return export_path
+
 def get_sys_lang():
     try:
         lang = locale.getlocale()[0]
