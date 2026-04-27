@@ -197,19 +197,38 @@ class SpotifyToolkitApp(ctk.CTk):
         self.logo_label.grid(row=0, column=0, padx=25, pady=(40, 30), sticky="w")
 
         # Utility to create buttons with consistent spacing
-        def make_nav_btn(text, cmd, row):
-            btn = ctk.CTkButton(self.sidebar_frame, text=text, command=cmd, 
+        self.nav_buttons = {}
+        self.nav_indicators = {}
+        def make_nav_btn(text, cmd, row, key):
+            # Container for button + indicator
+            container = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
+            container.grid(row=row, column=0, padx=0, pady=2, sticky="ew")
+            container.grid_columnconfigure(1, weight=1)
+
+            # Indicator (the green vertical bar)
+            indicator = ctk.CTkFrame(container, width=4, height=28, fg_color="transparent", corner_radius=2)
+            indicator.grid(row=0, column=0, padx=(0, 5), sticky="w")
+            self.nav_indicators[key] = indicator
+
+            btn = ctk.CTkButton(container, text=text, command=cmd, 
                                 fg_color="transparent", text_color=self.subtext_color, 
                                 hover_color="#282828", anchor="w", 
                                 font=self.font_sidebar, height=45, corner_radius=8)
-            btn.grid(row=row, column=0, padx=10, pady=2, sticky="ew")
+            btn.grid(row=0, column=1, padx=(0, 10), sticky="ew")
+            self.nav_buttons[key] = btn
             return btn
 
-        self.home_button = make_nav_btn("  🏠  " + T['sidebar_home'], self.show_home, 1)
-        self.clean_button = make_nav_btn("  ✨  " + T['sidebar_clean'], self.show_clean, 2)
-        self.organize_button = make_nav_btn("  📁  " + T['sidebar_organize'], self.show_organize, 3)
-        self.utils_button = make_nav_btn("  🛠️  " + T['sidebar_utils'], self.show_utils, 4)
-        self.stats_button = make_nav_btn("  📊  " + T['sidebar_stats'], self.show_stats, 5)
+        self.home_button = make_nav_btn("  🏠  " + T['sidebar_home'], self.show_home, 1, "home")
+        self.clean_button = make_nav_btn("  ✨  " + T['sidebar_clean'], self.show_clean, 2, "clean")
+        self.organize_button = make_nav_btn("  📁  " + T['sidebar_organize'], self.show_organize, 3, "organize")
+        self.utils_button = make_nav_btn("  🔧  " + T['sidebar_utils'], self.show_utils, 4, "utils")
+        self.stats_button = make_nav_btn("  📊  " + T['sidebar_stats'], self.show_stats, 5, "stats")
+
+        # Language Toggle at the bottom
+        self.lang_btn = ctk.CTkButton(self.sidebar_frame, text="🌐 EN / ES", command=self.toggle_language,
+                                      fg_color="transparent", text_color=self.subtext_color,
+                                      hover_color="#282828", font=ctk.CTkFont(size=11), height=30)
+        self.lang_btn.grid(row=6, column=0, padx=10, pady=20, sticky="s")
 
         # Main Container
         self.main_frame = ctk.CTkFrame(self, fg_color=self.bg_color)
@@ -244,7 +263,7 @@ class SpotifyToolkitApp(ctk.CTk):
         self.command_entry.grid(row=0, column=0, sticky="ew", padx=(0, 10))
         self.command_entry.bind("<Return>", lambda e: self.send_input_to_script())
 
-        # Progress Bar
+        # Progress Bar (Now inside a hidden/visible container if needed, but we'll keep it always visible for now)
         self.progress_bar = ctk.CTkProgressBar(self.log_container, height=6, corner_radius=3, progress_color=self.accent_color, fg_color="#333333")
         self.progress_bar.grid(row=2, column=0, padx=15, pady=(0, 15), sticky="ew")
         self.progress_bar.set(0)
@@ -262,6 +281,35 @@ class SpotifyToolkitApp(ctk.CTk):
 
         self.show_home()
 
+    def set_active_nav(self, active_key):
+        for key in self.nav_buttons.keys():
+            btn = self.nav_buttons[key]
+            indicator = self.nav_indicators[key]
+            if key == active_key:
+                btn.configure(text_color=self.text_color) # White text for active
+                indicator.configure(fg_color=self.accent_color) # Green bar visible
+            else:
+                btn.configure(text_color=self.subtext_color) # Gray text for inactive
+                indicator.configure(fg_color="transparent") # Green bar hidden
+
+    def toggle_language(self):
+        global LANG, T
+        LANG = 'en' if LANG == 'es' else 'es'
+        T = TEXTS[LANG]
+        self.title(T['title'])
+        # Refresh Sidebar Texts
+        self.nav_buttons['home'].configure(text="  🏠  " + T['sidebar_home'])
+        self.nav_buttons['clean'].configure(text="  ✨  " + T['sidebar_clean'])
+        self.nav_buttons['organize'].configure(text="  📁  " + T['sidebar_organize'])
+        self.nav_buttons['utils'].configure(text="  🔧  " + T['sidebar_utils'])
+        self.nav_buttons['stats'].configure(text="  📊  " + T['sidebar_stats'])
+        # Refresh current view
+        # We need to track the current view key
+        if hasattr(self, 'current_view'):
+            getattr(self, f"show_{self.current_view}")()
+        else:
+            self.show_home()
+
     def add_log(self, text):
         def _append():
             self.log_textbox.configure(state="normal")
@@ -272,6 +320,18 @@ class SpotifyToolkitApp(ctk.CTk):
 
     def add_log_raw(self, text):
         def _append():
+            # Capturar progreso para la barra (Formato PROG:XX)
+            if "PROG:" in text:
+                try:
+                    # Extraer el número del progreso
+                    match = re.search(r"PROG:(\d+)", text)
+                    if match:
+                        percent = int(match.group(1))
+                        self.progress_bar.set(percent / 100)
+                    return # No imprimir líneas de progreso en la consola
+                except:
+                    pass
+
             self.log_textbox.configure(state="normal")
             self.log_textbox.insert("end", text)
             self.log_textbox.configure(state="disabled")
@@ -325,12 +385,12 @@ class SpotifyToolkitApp(ctk.CTk):
                 )
 
                 while True:
-                    char = self.current_process.stdout.read(1)
-                    if not char:
+                    line = self.current_process.stdout.readline()
+                    if not line:
                         if self.current_process.poll() is not None:
                             break
                         continue
-                    self.add_log_raw(char)
+                    self.add_log_raw(line)
                 
                 self.current_process.wait()
 
@@ -349,35 +409,66 @@ class SpotifyToolkitApp(ctk.CTk):
             widget.destroy()
 
     def show_home(self):
+        self.current_view = "home"
+        self.set_active_nav("home")
         self.clear_content_frame()
         ctk.CTkLabel(self.content_frame, text=T['welcome_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 10), sticky="w")
         ctk.CTkLabel(self.content_frame, text=T['welcome_desc'], font=self.font_subtitle, text_color=self.subtext_color).grid(row=1, column=0, sticky="nw")
 
-    def add_tool_button(self, name, desc, path, row):
-        btn = ctk.CTkButton(self.content_frame, text=name, height=40, width=220, command=lambda: self.run_script_thread(path))
-        btn.grid(row=row*2, column=0, pady=(10, 0), sticky="w")
-        lbl = ctk.CTkLabel(self.content_frame, text=desc, font=self.font_desc, text_color="gray70")
-        lbl.grid(row=row*2+1, column=0, padx=(5, 0), pady=(0, 10), sticky="w")
+    def add_tool_card(self, name, desc, path, row, col):
+        # Card Container
+        card = ctk.CTkFrame(self.content_frame, fg_color=self.card_color, corner_radius=12, border_width=1, border_color="#2A2A2A")
+        card.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
+        card.grid_columnconfigure(0, weight=1)
+
+        # Title
+        title_lbl = ctk.CTkLabel(card, text=name, font=self.font_subtitle, text_color=self.accent_color, anchor="w")
+        title_lbl.grid(row=0, column=0, padx=15, pady=(15, 5), sticky="w")
+
+        # Description
+        desc_lbl = ctk.CTkLabel(card, text=desc, font=self.font_desc, text_color=self.subtext_color, wraplength=280, justify="left", anchor="nw")
+        desc_lbl.grid(row=1, column=0, padx=15, pady=(0, 15), sticky="nw")
+
+        # Button
+        btn = ctk.CTkButton(card, text=T['btn_send'] if LANG == 'en' else "Lanzar", height=32, 
+                            fg_color="#282828", hover_color="#3E3E3E", 
+                            font=ctk.CTkFont(size=12, weight="bold"),
+                            command=lambda: self.run_script_thread(path))
+        btn.grid(row=2, column=0, padx=15, pady=(0, 15), sticky="ew")
+        
+        # Hover effect (Visual only)
+        def on_enter(e): card.configure(border_color=self.accent_color)
+        def on_leave(e): card.configure(border_color="#2A2A2A")
+        card.bind("<Enter>", on_enter)
+        card.bind("<Leave>", on_leave)
 
     def show_clean(self):
+        self.current_view = "clean"
+        self.set_active_nav("clean")
         self.clear_content_frame()
-        ctk.CTkLabel(self.content_frame, text=T['clean_title'], font=self.font_title).grid(row=0, column=0, pady=(0, 20), sticky="w")
-        self.add_tool_button(T['btn_delete_duplicates'], T['desc_delete_duplicates'], "delete_duplicates/delete_duplicates.py", 1)
-        self.add_tool_button(T['btn_smart_shuffle'], T['desc_smart_shuffle'], "smart_shuffle/smart_shuffle.py", 2)
+        self.content_frame.grid_columnconfigure((0, 1), weight=1)
+        ctk.CTkLabel(self.content_frame, text=T['clean_title'], font=self.font_title).grid(row=0, column=0, columnspan=2, pady=(0, 20), sticky="w")
+        
+        self.add_tool_card(T['btn_delete_duplicates'], T['desc_delete_duplicates'], "delete_duplicates/delete_duplicates.py", 1, 0)
+        self.add_tool_card(T['btn_smart_shuffle'], T['desc_smart_shuffle'], "smart_shuffle/smart_shuffle.py", 1, 1)
 
     def show_organize(self):
+        self.current_view = "organize"
+        self.set_active_nav("organize")
         self.clear_content_frame()
-        ctk.CTkLabel(self.content_frame, text=T['organize_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
-        tools = [
-            (T['btn_separate_genres'], T['desc_separate_genres'], "separate_genres/separate_genres.py"),
-            (T['btn_separate_artists'], T['desc_separate_artists'], "separate_artists/separate_artists.py")
-        ]
-        for i, (name, desc, path) in enumerate(tools):
-            self.add_tool_button(name, desc, path, i+1)
+        self.content_frame.grid_columnconfigure((0, 1), weight=1)
+        ctk.CTkLabel(self.content_frame, text=T['organize_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, columnspan=2, pady=(0, 20), sticky="w")
+        
+        self.add_tool_card(T['btn_separate_genres'], T['desc_separate_genres'], "separate_genres/separate_genres.py", 1, 0)
+        self.add_tool_card(T['btn_separate_artists'], T['desc_separate_artists'], "separate_artists/separate_artists.py", 1, 1)
 
     def show_utils(self):
+        self.current_view = "utils"
+        self.set_active_nav("utils")
         self.clear_content_frame()
-        ctk.CTkLabel(self.content_frame, text=T['utils_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        self.content_frame.grid_columnconfigure((0, 1), weight=1)
+        ctk.CTkLabel(self.content_frame, text=T['utils_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, columnspan=2, pady=(0, 20), sticky="w")
+        
         tools = [
             (T['btn_metadata_export'], T['desc_metadata_export'], "metadata_export/metadata_export.py"),
             (T['btn_library_backup'], T['desc_library_backup'], "library_backup/library_backup.py"),
@@ -387,14 +478,18 @@ class SpotifyToolkitApp(ctk.CTk):
             (T['btn_reorder_tracks'], T['desc_reorder_tracks'], "reorder_tracks/reorder_tracks.py")
         ]
         for i, (name, desc, path) in enumerate(tools):
-            self.add_tool_button(name, desc, path, i+1)
+            self.add_tool_card(name, desc, path, (i // 2) + 1, i % 2)
 
     def show_stats(self):
+        self.current_view = "stats"
+        self.set_active_nav("stats")
         self.clear_content_frame()
-        ctk.CTkLabel(self.content_frame, text=T['stats_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
-        self.add_tool_button(T['btn_top_tracks'], T['desc_top_tracks'], "top_tracks_generator/top_tracks_generator.py", 1)
-        self.add_tool_button(T['btn_trend_reports'], T['desc_trend_reports'], "trend_reports/trend_reports.py", 2)
-        self.add_tool_button(T['btn_mood_mixer'], T['desc_mood_mixer'], "mood_mixer/mood_mixer.py", 3)
+        self.content_frame.grid_columnconfigure((0, 1), weight=1)
+        ctk.CTkLabel(self.content_frame, text=T['stats_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, columnspan=2, pady=(0, 20), sticky="w")
+        
+        self.add_tool_card(T['btn_top_tracks'], T['desc_top_tracks'], "top_tracks_generator/top_tracks_generator.py", 1, 0)
+        self.add_tool_card(T['btn_trend_reports'], T['desc_trend_reports'], "trend_reports/trend_reports.py", 1, 1)
+        self.add_tool_card(T['btn_mood_mixer'], T['desc_mood_mixer'], "mood_mixer/mood_mixer.py", 2, 0)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2 and sys.argv[1] == "--run":
