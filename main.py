@@ -8,11 +8,12 @@ import runpy
 import io
 import difflib # Forzamos la inclusión para PyInstaller
 import locale
-import re
 from PIL import Image
 from dotenv import load_dotenv
 import tqdm
 import spotipy
+
+from utils.progress_line import parse_progress_line
 
 # --- CORRECCIÓN DE CODIFICACIÓN PARA EMOJIS EN WINDOWS ---
 if sys.stdout is not None and hasattr(sys.stdout, 'reconfigure'):
@@ -320,17 +321,15 @@ class SpotifyToolkitApp(ctk.CTk):
 
     def add_log_raw(self, text):
         def _append():
-            # Capturar progreso para la barra (Formato PROG:XX)
-            if "PROG:" in text:
-                try:
-                    # Extraer el número del progreso
-                    match = re.search(r"PROG:(\d+)", text)
-                    if match:
-                        percent = int(match.group(1))
-                        self.progress_bar.set(percent / 100)
-                    return # No imprimir líneas de progreso en la consola
-                except:
-                    pass
+            # Lines that are *entirely* a `PROG:<N>` directive (with
+            # optional whitespace and CR/LF trailers) are routed to the
+            # progress bar and never echoed to the log. Ordinary log
+            # messages that happen to contain "PROG:" mid-sentence
+            # (e.g. "Logging PROG:50 ok") flow through unchanged.
+            percent = parse_progress_line(text)
+            if percent is not None:
+                self.progress_bar.set(percent / 100)
+                return
 
             self.log_textbox.configure(state="normal")
             self.log_textbox.insert("end", text)
