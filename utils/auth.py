@@ -9,7 +9,7 @@ def get_spotify_client(scope=None):
     Default scope covers most toolkit operations.
     """
     if scope is None:
-        scope = 'user-library-read user-top-read playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private'
+        scope = 'user-library-read user-top-read user-read-recently-played playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private'
     
     # Environment variables are expected to be set by main_gui or .env
     client_id = os.getenv("SPOTIFY_CLIENT_ID")

@@ -46,11 +46,7 @@ LANG = get_system_lang()
 
 TEXTS = {
     'es': {
-<<<<<<< Updated upstream
-        'title': "Spotify Toolkit v1.0.6",
-=======
         'title': "Spotify Toolkit v1.2.0",
->>>>>>> Stashed changes
         'sidebar_home': "Inicio",
         'sidebar_clean': "Limpieza",
         'sidebar_organize': "Organizar",
@@ -83,17 +79,15 @@ TEXTS = {
         'btn_smart_shuffle': "Smart Shuffle",
         'desc_smart_shuffle': "Mezcla tus listas evitando que suenen dos canciones seguidas del mismo artista.",
         'btn_metadata_export': "Exportar Metadatos",
-<<<<<<< Updated upstream
         'desc_metadata_export': "Exporta una playlist a CSV o JSON para usar en otras plataformas.",
-=======
-        'desc_metadata_export': "Exporta una playlist a CSV o JSON.",
         'btn_playlist_merger': "Fusionar Playlists",
         'desc_playlist_merger': "Une varias listas en una nueva.",
         'btn_mood_mixer': "Mood Mixer",
         'desc_mood_mixer': "Mezcla por estado de ánimo.",
+        'btn_discovery_engine': "Discovery Engine",
+        'desc_discovery_engine': "Busca canciones y obtén recomendaciones.",
         'btn_library_backup': "Copia de Seguridad",
         'desc_library_backup': "Respalda toda tu biblioteca.",
->>>>>>> Stashed changes
         'input_placeholder': "Escribir aquí...",
         'btn_send': "Enviar",
         'btn_cancel': "Cancelar",
@@ -105,11 +99,7 @@ TEXTS = {
         'error_fatal': "❌ Error fatal en script: "
     },
     'en': {
-<<<<<<< Updated upstream
-        'title': "Spotify Toolkit v1.0.6",
-=======
         'title': "Spotify Toolkit v1.2.0",
->>>>>>> Stashed changes
         'sidebar_home': "Home",
         'sidebar_clean': "Clean",
         'sidebar_organize': "Organize",
@@ -142,17 +132,15 @@ TEXTS = {
         'btn_smart_shuffle': "Smart Shuffle",
         'desc_smart_shuffle': "Shuffle your lists while avoiding two songs from the same artist in a row.",
         'btn_metadata_export': "Export Metadata",
-<<<<<<< Updated upstream
         'desc_metadata_export': "Export a playlist to CSV or JSON for use on other platforms.",
-=======
-        'desc_metadata_export': "Export to CSV or JSON.",
         'btn_playlist_merger': "Playlist Merger",
         'desc_playlist_merger': "Combine multiple lists into a new one.",
         'btn_mood_mixer': "Mood Mixer",
         'desc_mood_mixer': "Mix based on your mood.",
+        'btn_discovery_engine': "Discovery Engine",
+        'desc_discovery_engine': "Search songs and get recommendations.",
         'btn_library_backup': "Library Backup",
         'desc_library_backup': "Backup your entire library.",
->>>>>>> Stashed changes
         'input_placeholder': "Type here...",
         'btn_send': "Send",
         'btn_cancel': "Cancel",
@@ -452,6 +440,7 @@ class SpotifyToolkitApp(ctk.CTk):
         self.add_tool_button(T['btn_top_tracks'], T['desc_top_tracks'], "top_tracks_generator/top_tracks_generator.py", 1)
         self.add_tool_button(T['btn_trend_reports'], T['desc_trend_reports'], "trend_reports/trend_reports.py", 2)
         self.add_tool_button(T['btn_mood_mixer'], T['desc_mood_mixer'], "mood_mixer/mood_mixer.py", 3)
+        self.add_tool_button(T['btn_discovery_engine'], T['desc_discovery_engine'], "discovery_engine/discovery_engine.py", 4)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2 and sys.argv[1] == "--run":
