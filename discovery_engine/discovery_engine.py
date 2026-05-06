@@ -1,22 +1,41 @@
 import os
 import sys
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
-from tqdm import tqdm
 
-# --- CONFIGURACIÓN Y AUTENTICACIÓN ---
-print("⏳ Iniciando Discovery Engine...")
+# Forzar salida inmediata para depuración
+print("⏳ Iniciando Discovery Engine (Modo Rescate)...", flush=True)
+
 try:
+    import spotipy
+    from spotipy.oauth2 import SpotifyOAuth
+    print("✅ Spotipy cargado.", flush=True)
+except ImportError:
+    print("❌ Error: La librería 'spotipy' no está instalada. Ejecuta: pip install spotipy", flush=True)
+    sys.exit(1)
+
+try:
+    # tqdm no es crítico, lo hacemos opcional
+    try:
+        from tqdm import tqdm
+    except ImportError:
+        tqdm = None
+        print("⚠️ Nota: 'tqdm' no está instalado, pero el script continuará.", flush=True)
+
+    # --- CONFIGURACIÓN DE RUTAS ---
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    sys.path.append(project_root)
+    if project_root not in sys.path:
+        sys.path.append(project_root)
     
     from utils.auth import get_spotify_client
     from utils.helpers import select_playlist
-    print("✅ Librerías cargadas. Conectando con Spotify...")
+    print("✅ Utilidades cargadas. Conectando...", flush=True)
+    
     sp = get_spotify_client()
-    print(f"✅ Conectado como: {sp.me()['display_name']}")
+    print(f"✅ Conectado como: {sp.me()['display_name']}", flush=True)
+
 except Exception as e:
-    print(f"❌ Error durante el inicio: {e}")
+    print(f"❌ Error crítico durante el inicio: {e}", flush=True)
+    import traceback
+    traceback.print_exc()
     sys.exit(1)
 
 def buscar_y_añadir():
