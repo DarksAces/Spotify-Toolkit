@@ -10,6 +10,9 @@ import difflib # Forzamos la inclusión para PyInstaller
 import locale
 from PIL import Image
 from dotenv import load_dotenv
+import tqdm
+import spotipy
+import spotipy.util as util
 
 # --- CORRECCIÓN DE CODIFICACIÓN PARA EMOJIS EN WINDOWS ---
 if sys.stdout is not None and hasattr(sys.stdout, 'reconfigure'):

@@ -2,7 +2,10 @@ import os
 import sys
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from tqdm import tqdm
+try:
+    from tqdm import tqdm
+except ImportError:
+    tqdm = None
 
 # --- CONFIGURACIÓN Y AUTENTICACIÓN ---
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))

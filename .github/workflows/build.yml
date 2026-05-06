@@ -25,7 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller spotipy python-dotenv customtkinter pillow darkdetect
+        pip install pyinstaller spotipy python-dotenv tqdm customtkinter pillow darkdetect
 
     - name: Build EXE with Secrets
       shell: pwsh
@@ -56,6 +56,9 @@ jobs:
             "top_tracks_generator", "Top Tracks Generator",
             "mood_mixer", "Mood Mixer",
             "metadata_export", "metadata_export",
+            "discovery_engine", "discovery_engine",
+            "dead_tracks_detector", "dead_tracks_detector",
+            "trend_reports", "trend_reports",
             "utils", "utils"
         )
 
