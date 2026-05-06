@@ -62,6 +62,8 @@ TEXTS = {
         'stats_title': "Estadísticas y Análisis",
         'btn_delete_duplicates': "Borrar Duplicados",
         'desc_delete_duplicates': "Busca y elimina canciones repetidas en tus playlists para mantenerlas limpias.",
+        'btn_dead_tracks': "Detectar Canciones Muertas",
+        'desc_dead_tracks': "Busca canciones no disponibles por licencias.",
         'btn_separate_genres': "Separar por Géneros",
         'desc_separate_genres': "Analiza una playlist y crea nuevas listas separadas por géneros musicales.",
         'btn_separate_artists': "Separar por Artistas",
@@ -88,6 +90,8 @@ TEXTS = {
         'desc_discovery_engine': "Busca canciones y obtén recomendaciones.",
         'btn_library_backup': "Copia de Seguridad",
         'desc_library_backup': "Respalda toda tu biblioteca.",
+        'btn_logout': "Cerrar Sesión",
+        'desc_logout': "¿Quieres cerrar sesión?",
         'input_placeholder': "Escribir aquí...",
         'btn_send': "Enviar",
         'btn_cancel': "Cancelar",
@@ -115,6 +119,8 @@ TEXTS = {
         'stats_title': "Stats & Analysis",
         'btn_delete_duplicates': "Delete Duplicates",
         'desc_delete_duplicates': "Find and remove repeated songs in your playlists to keep them clean.",
+        'btn_dead_tracks': "Dead Tracks Detector",
+        'desc_dead_tracks': "Find tracks unavailable due to licensing.",
         'btn_separate_genres': "Separate by Genres",
         'desc_separate_genres': "Analyze a playlist and create new lists separated by musical genres.",
         'btn_separate_artists': "Separate by Artists",
@@ -141,6 +147,8 @@ TEXTS = {
         'desc_discovery_engine': "Search songs and get recommendations.",
         'btn_library_backup': "Library Backup",
         'desc_library_backup': "Backup your entire library.",
+        'btn_logout': "Logout",
+        'desc_logout': "Do you want to logout?",
         'input_placeholder': "Type here...",
         'btn_send': "Send",
         'btn_cancel': "Cancel",
@@ -214,6 +222,14 @@ class SpotifyToolkitApp(ctk.CTk):
         self.utils_button = make_nav_btn("  🛠️  " + T['sidebar_utils'], self.show_utils, 4)
         self.stats_button = make_nav_btn("  📊  " + T['sidebar_stats'], self.show_stats, 5)
 
+        # Logout Button at the bottom
+        self.logout_btn = ctk.CTkButton(self.sidebar_frame, text="  🚪  " + T['btn_logout'], command=self.logout,
+                                      fg_color="transparent", text_color="#FF4B4B", # Reddish for logout
+                                      hover_color="#282828", font=self.font_sidebar, height=45, corner_radius=8)
+        self.logout_btn.grid(row=6, column=0, padx=10, pady=(20, 20), sticky="s")
+        self.sidebar_frame.grid_rowconfigure(6, weight=0) # Specific row for logout
+        self.sidebar_frame.grid_rowconfigure(5, weight=1) # Push everything up
+
         # Main Container
         self.main_frame = ctk.CTkFrame(self, fg_color=self.bg_color)
         self.main_frame.grid(row=0, column=1, padx=30, pady=30, sticky="nsew")
@@ -221,7 +237,7 @@ class SpotifyToolkitApp(ctk.CTk):
         self.main_frame.grid_rowconfigure(0, weight=1) 
         self.main_frame.grid_rowconfigure(1, weight=0) 
 
-        self.content_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.content_frame = ctk.CTkScrollableFrame(self.main_frame, fg_color="transparent")
         self.content_frame.grid(row=0, column=0, sticky="nsew")
         self.content_frame.grid_columnconfigure(0, weight=1)
 
@@ -265,6 +281,17 @@ class SpotifyToolkitApp(ctk.CTk):
 
         self.show_home()
 
+    def logout(self):
+        try:
+            cache_path = os.path.join(os.getcwd(), ".cache")
+            if os.path.exists(cache_path):
+                os.remove(cache_path)
+            self.add_log("👋 Cerrando sesión y reiniciando...")
+            # Restart the app
+            os.execl(sys.executable, sys.executable, *sys.argv)
+        except Exception as e:
+            self.add_log(f"❌ Error al cerrar sesión: {e}")
+
     def add_log(self, text):
         def _append():
             self.log_textbox.configure(state="normal")
@@ -274,33 +301,37 @@ class SpotifyToolkitApp(ctk.CTk):
         self.after(0, _append)
 
     def add_log_raw(self, text):
-        """Adds text without an automatic newline, useful for prompts."""
+        """Adds text to the console, filtering out progress markers and handling artifacts."""
         def _append():
+            # Buffering logic could be here, but for now we filter common patterns
+            if "PROG:" in text:
+                try:
+                    import re
+                    match = re.search(r'PROG:(\d+)', text)
+                    if match:
+                        val = int(match.group(1)) / 100.0
+                        self.progress_bar.set(val)
+                    # If the line is ONLY a progress marker (possibly with whitespace), don't print it
+                    if re.fullmatch(r'\s*PROG:\d+\s*', text):
+                        return
+                except:
+                    pass
+
             self.log_textbox.configure(state="normal")
+            
+            # Clean up text: replace \r\n with \n, or handle \r if needed
+            clean_text = text.replace('\r', '')
             
             # Determine tag based on content
             tag = None
-            if "✅" in text: tag = "success"
-            elif "❌" in text or "🛑" in text: tag = "error"
-            elif "⚠️" in text: tag = "warning"
-            elif "🚀" in text or "🔍" in text: tag = "info"
+            if "✅" in clean_text: tag = "success"
+            elif "❌" in clean_text or "🛑" in clean_text: tag = "error"
+            elif "⚠️" in clean_text: tag = "warning"
+            elif "🚀" in clean_text or "🔍" in clean_text: tag = "info"
             
-            self.log_textbox.insert("end", text, tag)
+            self.log_textbox.insert("end", clean_text, tag)
             self.log_textbox.configure(state="disabled")
             self.log_textbox.see("end")
-            
-            # Detect progress markers like [PROG:45]
-            if '[' in text or 'PROG' in text:
-                full_content = self.log_textbox.get("end-50c", "end") # check last 50 chars
-                if "PROG:" in full_content:
-                    try:
-                        import re
-                        match = re.search(r'PROG:(\d+)', full_content)
-                        if match:
-                            val = int(match.group(1)) / 100.0
-                            self.progress_bar.set(val)
-                    except:
-                        pass
         self.after(0, _append)
 
     def send_input_to_script(self):
@@ -409,6 +440,7 @@ class SpotifyToolkitApp(ctk.CTk):
         ctk.CTkLabel(self.content_frame, text=T['clean_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
         self.add_tool_button(T['btn_delete_duplicates'], T['desc_delete_duplicates'], "delete_duplicates/delete_duplicates.py", 1)
         self.add_tool_button(T['btn_smart_shuffle'], T['desc_smart_shuffle'], "smart_shuffle/smart_shuffle.py", 2)
+        self.add_tool_button(T['btn_dead_tracks'], T['desc_dead_tracks'], "dead_tracks_detector/dead_tracks_detector.py", 3)
 
     def show_organize(self):
         self.clear_content_frame()

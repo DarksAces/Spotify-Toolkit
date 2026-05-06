@@ -132,17 +132,17 @@ def select_playlist(sp, prompt="Elige una playlist:", include_liked=False):
                     print(f"{original_idx}: {name} ({total_tracks} {HT['tracks_count']})")
                 print(HT['write_exact'])
 
-def get_all_tracks(sp, mode, playlist_id=None):
+def get_all_tracks(sp, mode, playlist_id=None, market=None):
     """Obtiene todas las canciones de una playlist o de 'Liked Songs' con reporte de progreso."""
     tracks = []
     try:
         if mode == "liked_songs":
             print(HT['getting_liked'])
-            results = sp.current_user_saved_tracks(limit=50)
+            results = sp.current_user_saved_tracks(limit=50, market=market)
             total = results.get('total', 0)
         else:
             print(HT['getting_playlist'])
-            results = sp.playlist_tracks(playlist_id)
+            results = sp.playlist_tracks(playlist_id, market=market)
             total = results.get('total', 0)
         
         fetched = 0
