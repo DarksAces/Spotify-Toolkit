@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 import tqdm
 import spotipy
 
-from utils.progress_line import parse_progress_line
+from utils.progress_line import is_blank_console_line, parse_progress_line
 
 # --- CORRECCIÓN DE CODIFICACIÓN PARA EMOJIS EN WINDOWS ---
 if sys.stdout is not None and hasattr(sys.stdout, 'reconfigure'):
@@ -329,6 +329,9 @@ class SpotifyToolkitApp(ctk.CTk):
             percent = parse_progress_line(text)
             if percent is not None:
                 self.progress_bar.set(percent / 100)
+                return
+
+            if is_blank_console_line(text):
                 return
 
             self.log_textbox.configure(state="normal")
