@@ -6,7 +6,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-from utils.progress_line import parse_progress_line
+from utils.progress_line import is_blank_console_line, parse_progress_line
 
 
 def test_plain_progress_line_is_recognised():
@@ -42,11 +42,25 @@ def test_non_numeric_progress_is_not_recognised():
 
 def test_empty_input_is_not_recognised():
     assert parse_progress_line("") is None
-    assert parse_progress_line(None) is None  # type: ignore[arg-type]
+    assert parse_progress_line(None) is None
 
 
 def test_plain_log_line_is_passed_through():
     assert parse_progress_line("Doing stuff\n") is None
+
+
+def test_blank_console_line_is_suppressed():
+    assert is_blank_console_line("")
+    assert is_blank_console_line("\n")
+    assert is_blank_console_line("\r")
+    assert is_blank_console_line("\r\n")
+    assert is_blank_console_line("   \r\n")
+    assert is_blank_console_line(None)
+
+
+def test_non_blank_console_line_is_not_suppressed():
+    assert not is_blank_console_line("Processing tracks\n")
+    assert not is_blank_console_line("  PROG:50\n")
 
 
 if __name__ == "__main__":
@@ -60,4 +74,6 @@ if __name__ == "__main__":
     test_non_numeric_progress_is_not_recognised()
     test_empty_input_is_not_recognised()
     test_plain_log_line_is_passed_through()
+    test_blank_console_line_is_suppressed()
+    test_non_blank_console_line_is_not_suppressed()
     print("[OK] all parse_progress_line tests passed")
