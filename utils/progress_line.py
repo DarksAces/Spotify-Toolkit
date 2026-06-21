@@ -24,7 +24,7 @@ from typing import Optional
 _PROG_LINE_RE = re.compile(r"^\s*PROG:(\d+)\s*$")
 
 
-def parse_progress_line(text: str) -> Optional[int]:
+def parse_progress_line(text: Optional[str]) -> Optional[int]:
     """Return the integer percentage if ``text`` is a progress directive.
 
     Returns ``None`` for any line that is not a standalone ``PROG:<N>``
@@ -40,3 +40,14 @@ def parse_progress_line(text: str) -> Optional[int]:
         return int(match.group(1))
     except (TypeError, ValueError):
         return None
+
+
+def is_blank_console_line(text: Optional[str]) -> bool:
+    """Return ``True`` for output chunks that should not reach the log.
+
+    Progress-producing tools such as ``tqdm`` often emit standalone
+    carriage returns or empty newline chunks while redrawing a progress
+    line. Those chunks create visual blank rows in the GUI console, so the
+    log textbox should ignore them entirely.
+    """
+    return text is None or text.strip() == ""
