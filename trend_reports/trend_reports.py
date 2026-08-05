@@ -4,6 +4,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from datetime import datetime
 from collections import Counter
+from tqdm import tqdm
 
 # --- CONFIGURACIÓN Y AUTENTICACIÓN ---
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -31,14 +32,16 @@ def analyze_genres(tracks):
     artist_ids = list(artist_ids)
     genres = []
     # Spotify limit for multiple artists is 50
-    for i in range(0, len(artist_ids), 50):
-        batch = artist_ids[i:i+50]
-        batch = [aid for aid in batch if aid]
-        if batch:
-            artists_data = sp.artists(batch)['artists']
-            for a in artists_data:
-                if a and 'genres' in a:
-                    genres.extend(a['genres'])
+    with tqdm(total=len(artist_ids), desc="Analizando artistas", unit="artist") as pbar:
+        for i in range(0, len(artist_ids), 50):
+            batch = artist_ids[i:i+50]
+            batch = [aid for aid in batch if aid]
+            if batch:
+                artists_data = sp.artists(batch)['artists']
+                for a in artists_data:
+                    if a and 'genres' in a:
+                        genres.extend(a['genres'])
+                pbar.update(len(batch))
     
     return Counter(genres).most_common(10)
 

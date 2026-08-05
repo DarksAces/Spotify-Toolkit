@@ -5,6 +5,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from requests.exceptions import ReadTimeout
 from spotipy.exceptions import SpotifyException
+from tqdm import tqdm
 
 # --- CONFIGURACIÓN Y AUTENTICACIÓN ---
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -39,32 +40,34 @@ def classify_tracks_by_similar_artists(tracks):
     # Cache para no repetir búsquedas de artistas relacionados
     related_cache = {}
 
-    for idx, item in enumerate(tracks, 1):
-        track = item['track']
-        if not track or not track['artists']: continue
-        
-        artist = track['artists'][0]
-        artist_id = artist['id']
-        artist_name = artist['name']
+    with tqdm(total=total, desc="Analizando similares", unit="track") as pbar:
+        for idx, item in enumerate(tracks, 1):
+            track = item['track']
+            if not track or not track['artists']: 
+                pbar.update(1)
+                continue
+            
+            artist = track['artists'][0]
+            artist_id = artist['id']
+            artist_name = artist['name']
 
-        if idx % 10 == 0 or idx == total:
-            print(f"   ∟ Procesando {idx}/{total}...")
+            if artist_id not in related_cache:
+                while True:
+                    try:
+                        related = sp.artist_related_artists(artist_id)['artists']
+                        related_cache[artist_id] = [r['name'] for r in related]
+                        break
+                    except ReadTimeout:
+                        time.sleep(2)
+                    except SpotifyException as e:
+                        if e.http_status == 429:
+                            time.sleep(int(e.headers.get('Retry-After', 1)))
+                        else: raise e
 
-        if artist_id not in related_cache:
-            while True:
-                try:
-                    related = sp.artist_related_artists(artist_id)['artists']
-                    related_cache[artist_id] = [r['name'] for r in related]
-                    break
-                except ReadTimeout:
-                    time.sleep(2)
-                except SpotifyException as e:
-                    if e.http_status == 429:
-                        time.sleep(int(e.headers.get('Retry-After', 1)))
-                    else: raise e
-
-        for related_name in related_cache[artist_id]:
-            similar_artist_dict.setdefault(related_name, []).append(track['id'])
+            for related_name in related_cache[artist_id]:
+                similar_artist_dict.setdefault(related_name, []).append(track['id'])
+            
+            pbar.update(1)
 
     return similar_artist_dict
 
@@ -102,8 +105,11 @@ def main():
             name = f"{artist} Mix"
             print(f"   ∟ Creando: {name} ({len(unique_ids)} tracks)")
             new_pl = sp.user_playlist_create(user_id, name, public=False)
-            for i in range(0, len(unique_ids), 100):
-                sp.playlist_add_items(new_pl['id'], unique_ids[i:i+100])
+            with tqdm(total=len(unique_ids), desc=f"Añadiendo tracks", unit="track", leave=False) as pbar:
+                for i in range(0, len(unique_ids), 100):
+                    batch = unique_ids[i:i+100]
+                    sp.playlist_add_items(new_pl['id'], batch)
+                    pbar.update(len(batch))
 
     print("\n✨ Proceso completado.")
 

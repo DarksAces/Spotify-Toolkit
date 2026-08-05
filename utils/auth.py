@@ -12,9 +12,9 @@ def get_spotify_client(scope=None):
         scope = 'user-library-read user-top-read user-read-recently-played playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private'
     
     # Environment variables are expected to be set by main_gui or .env
-    client_id = os.getenv("SPOTIFY_CLIENT_ID")
-    client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
-    redirect_uri = os.getenv("SPOTIFY_REDIRECT_URI")
+    client_id = os.getenv("SPOTIFY_CLIENT_ID", "").strip()
+    client_secret = os.getenv("SPOTIFY_CLIENT_SECRET", "").strip()
+    redirect_uri = os.getenv("SPOTIFY_REDIRECT_URI", "").strip()
 
     if not all([client_id, client_secret, redirect_uri]):
         print("❌ Error: Missing Spotify credentials in environment variables.")
