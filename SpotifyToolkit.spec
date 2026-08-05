@@ -1,37 +1,16 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 
-import customtkinter
-import os
-
-ctk_path = os.path.dirname(customtkinter.__file__)
-
 a = Analysis(
-    ['main.py'],
+    ['main_build.py'],
     pathex=[],
     binaries=[],
-    datas=[
-        ('delete_duplicates', 'delete_duplicates'),
-        ('artist_extractor', 'artist_extractor'),
-        ('reorder_tracks', 'reorder_tracks'),
-        ('separate_artists', 'separate_artists'),
-        ('separate_genres', 'separate_genres'),
-        ('smart_shuffle', 'smart_shuffle'),
-        ('playlist_time', 'playlist_time'),
-        ('top_tracks_generator', 'top_tracks_generator'),
-        ('trend_reports', 'trend_reports'),
-        ('metadata_export', 'metadata_export'),
-        ('utils', 'utils'),
-        (ctk_path, 'customtkinter'),
-        ('playlist_merger', 'playlist_merger'),
-        ('mood_mixer', 'mood_mixer'),
-        ('library_backup', 'library_backup')
-    ],
-    hiddenimports=['spotipy', 'customtkinter', 'difflib', 'tqdm'],
+    datas=[('utils', 'utils'), ('delete_duplicates', 'delete_duplicates'), ('metadata_export', 'metadata_export'), ('library_backup', 'library_backup'), ('smart_shuffle', 'smart_shuffle'), ('separate_genres', 'separate_genres'), ('separate_artists', 'separate_artists'), ('top_tracks_generator', 'top_tracks_generator'), ('trend_reports', 'trend_reports'), ('mood_mixer', 'mood_mixer'), ('dead_tracks_detector', 'dead_tracks_detector'), ('discovery_engine', 'discovery_engine'), ('C:\\Users\\danie\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\customtkinter', 'customtkinter')],
+    hiddenimports=['spotipy', 'customtkinter', 'difflib', 'PIL.Image', 'PIL.ImageTk', 'darkdetect', 'tqdm', 'dotenv'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['torch', 'numpy', 'scipy', 'matplotlib', 'pandas', 'tensorflow', 'onnxruntime', 'torchvision', 'lxml', 'fsspec', 'imageio', 'ffmpeg', 'cv2', 'IPython', 'PIL.ImageQt'],
+    excludes=[],
     noarchive=False,
     optimize=0,
 )
