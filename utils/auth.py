@@ -9,7 +9,7 @@ def get_spotify_client(scope=None):
     Default scope covers most toolkit operations.
     """
     if scope is None:
-        scope = 'user-library-read user-top-read playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private'
+        scope = 'user-library-read user-top-read user-read-recently-played playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private'
     
     # Environment variables are expected to be set by main_gui or .env
     client_id = os.getenv("SPOTIFY_CLIENT_ID", "").strip()
@@ -20,12 +20,17 @@ def get_spotify_client(scope=None):
         print("❌ Error: Missing Spotify credentials in environment variables.")
         sys.exit(1)
 
+    # Cache path should be in the project root
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    cache_path = os.path.join(project_root, ".cache")
+
     return spotipy.Spotify(
         auth_manager=SpotifyOAuth(
             client_id=client_id,
             client_secret=client_secret,
             redirect_uri=redirect_uri,
             scope=scope,
+            cache_path=cache_path,
             open_browser=True
         ),
         requests_timeout=10,

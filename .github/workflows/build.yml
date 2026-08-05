@@ -56,6 +56,9 @@ jobs:
             "top_tracks_generator", "Top Tracks Generator",
             "trend_reports", "trend_reports",
             "metadata_export", "metadata_export",
+            "discovery_engine", "discovery_engine",
+            "dead_tracks_detector", "dead_tracks_detector",
+            "trend_reports", "trend_reports",
             "utils", "utils"
         )
 

@@ -49,7 +49,7 @@ LANG = get_system_lang()
 
 TEXTS = {
     'es': {
-        'title': "Spotify Toolkit v1.1.1",
+        'title': "Spotify Toolkit v1.2.0",
         'sidebar_home': "Inicio",
         'sidebar_clean': "Limpieza",
         'sidebar_organize': "Organizar",
@@ -64,7 +64,9 @@ TEXTS = {
         'utils_title': "Utilidades y Respaldo",
         'stats_title': "Estadísticas y Análisis",
         'btn_delete_duplicates': "Borrar Duplicados",
-        'desc_delete_duplicates': "Busca e elimina canciones repetidas.",
+        'desc_delete_duplicates': "Busca y elimina canciones repetidas en tus playlists para mantenerlas limpias.",
+        'btn_dead_tracks': "Detectar Canciones Muertas",
+        'desc_dead_tracks': "Busca canciones no disponibles por licencias.",
         'btn_separate_genres': "Separar por Géneros",
         'desc_separate_genres': "Crea listas separadas por géneros.",
         'btn_separate_artists': "Separar por Artistas",
@@ -82,13 +84,17 @@ TEXTS = {
         'btn_smart_shuffle': "Smart Shuffle",
         'desc_smart_shuffle': "Mezcla evitando artistas seguidos.",
         'btn_metadata_export': "Exportar Metadatos",
-        'desc_metadata_export': "Exporta una playlist a CSV o JSON.",
+        'desc_metadata_export': "Exporta una playlist a CSV o JSON para usar en otras plataformas.",
         'btn_playlist_merger': "Fusionar Playlists",
         'desc_playlist_merger': "Une varias listas en una nueva.",
         'btn_mood_mixer': "Mood Mixer",
         'desc_mood_mixer': "Mezcla por estado de ánimo.",
+        'btn_discovery_engine': "Discovery Engine",
+        'desc_discovery_engine': "Busca canciones y obtén recomendaciones.",
         'btn_library_backup': "Copia de Seguridad",
         'desc_library_backup': "Respalda toda tu biblioteca.",
+        'btn_logout': "Cerrar Sesión",
+        'desc_logout': "¿Quieres cerrar sesión?",
         'input_placeholder': "Escribir aquí...",
         'btn_send': "Enviar",
         'btn_cancel': "Cancelar",
@@ -100,7 +106,7 @@ TEXTS = {
         'error_fatal': "❌ Error fatal en script: "
     },
     'en': {
-        'title': "Spotify Toolkit v1.1.1",
+        'title': "Spotify Toolkit v1.2.0",
         'sidebar_home': "Home",
         'sidebar_clean': "Clean",
         'sidebar_organize': "Organize",
@@ -115,7 +121,9 @@ TEXTS = {
         'utils_title': "Utilities & Backup",
         'stats_title': "Stats & Analysis",
         'btn_delete_duplicates': "Delete Duplicates",
-        'desc_delete_duplicates': "Find and remove repeated songs.",
+        'desc_delete_duplicates': "Find and remove repeated songs in your playlists to keep them clean.",
+        'btn_dead_tracks': "Dead Tracks Detector",
+        'desc_dead_tracks': "Find tracks unavailable due to licensing.",
         'btn_separate_genres': "Separate by Genres",
         'desc_separate_genres': "Create separate lists by genre.",
         'btn_separate_artists': "Separate by Artists",
@@ -133,13 +141,17 @@ TEXTS = {
         'btn_smart_shuffle': "Smart Shuffle",
         'desc_smart_shuffle': "Shuffle avoiding repeated artists.",
         'btn_metadata_export': "Export Metadata",
-        'desc_metadata_export': "Export to CSV or JSON.",
+        'desc_metadata_export': "Export a playlist to CSV or JSON for use on other platforms.",
         'btn_playlist_merger': "Playlist Merger",
         'desc_playlist_merger': "Combine multiple lists into a new one.",
         'btn_mood_mixer': "Mood Mixer",
         'desc_mood_mixer': "Mix based on your mood.",
+        'btn_discovery_engine': "Discovery Engine",
+        'desc_discovery_engine': "Search songs and get recommendations.",
         'btn_library_backup': "Library Backup",
         'desc_library_backup': "Backup your entire library.",
+        'btn_logout': "Logout",
+        'desc_logout': "Do you want to logout?",
         'input_placeholder': "Type here...",
         'btn_send': "Send",
         'btn_cancel': "Cancel",
@@ -231,6 +243,14 @@ class SpotifyToolkitApp(ctk.CTk):
                                       hover_color="#282828", font=ctk.CTkFont(size=11), height=30)
         self.lang_btn.grid(row=6, column=0, padx=10, pady=20, sticky="s")
 
+        # Logout Button at the bottom
+        self.logout_btn = ctk.CTkButton(self.sidebar_frame, text="  🚪  " + T['btn_logout'], command=self.logout,
+                                      fg_color="transparent", text_color="#FF4B4B", # Reddish for logout
+                                      hover_color="#282828", font=self.font_sidebar, height=45, corner_radius=8)
+        self.logout_btn.grid(row=6, column=0, padx=10, pady=(20, 20), sticky="s")
+        self.sidebar_frame.grid_rowconfigure(6, weight=0) # Specific row for logout
+        self.sidebar_frame.grid_rowconfigure(5, weight=1) # Push everything up
+
         # Main Container
         self.main_frame = ctk.CTkFrame(self, fg_color=self.bg_color)
         self.main_frame.grid(row=0, column=1, padx=30, pady=30, sticky="nsew")
@@ -282,34 +302,16 @@ class SpotifyToolkitApp(ctk.CTk):
 
         self.show_home()
 
-    def set_active_nav(self, active_key):
-        for key in self.nav_buttons.keys():
-            btn = self.nav_buttons[key]
-            indicator = self.nav_indicators[key]
-            if key == active_key:
-                btn.configure(text_color=self.text_color) # White text for active
-                indicator.configure(fg_color=self.accent_color) # Green bar visible
-            else:
-                btn.configure(text_color=self.subtext_color) # Gray text for inactive
-                indicator.configure(fg_color="transparent") # Green bar hidden
-
-    def toggle_language(self):
-        global LANG, T
-        LANG = 'en' if LANG == 'es' else 'es'
-        T = TEXTS[LANG]
-        self.title(T['title'])
-        # Refresh Sidebar Texts
-        self.nav_buttons['home'].configure(text="  🏠  " + T['sidebar_home'])
-        self.nav_buttons['clean'].configure(text="  ✨  " + T['sidebar_clean'])
-        self.nav_buttons['organize'].configure(text="  📁  " + T['sidebar_organize'])
-        self.nav_buttons['utils'].configure(text="  🔧  " + T['sidebar_utils'])
-        self.nav_buttons['stats'].configure(text="  📊  " + T['sidebar_stats'])
-        # Refresh current view
-        # We need to track the current view key
-        if hasattr(self, 'current_view'):
-            getattr(self, f"show_{self.current_view}")()
-        else:
-            self.show_home()
+    def logout(self):
+        try:
+            cache_path = os.path.join(os.getcwd(), ".cache")
+            if os.path.exists(cache_path):
+                os.remove(cache_path)
+            self.add_log("👋 Cerrando sesión y reiniciando...")
+            # Restart the app
+            os.execl(sys.executable, sys.executable, *sys.argv)
+        except Exception as e:
+            self.add_log(f"❌ Error al cerrar sesión: {e}")
 
     def add_log(self, text):
         def _append():
@@ -320,22 +322,35 @@ class SpotifyToolkitApp(ctk.CTk):
         self.after(0, _append)
 
     def add_log_raw(self, text):
+        """Adds text to the console, filtering out progress markers and handling artifacts."""
         def _append():
-            # Lines that are *entirely* a `PROG:<N>` directive (with
-            # optional whitespace and CR/LF trailers) are routed to the
-            # progress bar and never echoed to the log. Ordinary log
-            # messages that happen to contain "PROG:" mid-sentence
-            # (e.g. "Logging PROG:50 ok") flow through unchanged.
-            percent = parse_progress_line(text)
-            if percent is not None:
-                self.progress_bar.set(percent / 100)
-                return
-
-            if is_blank_console_line(text):
-                return
+            # Buffering logic could be here, but for now we filter common patterns
+            if "PROG:" in text:
+                try:
+                    import re
+                    match = re.search(r'PROG:(\d+)', text)
+                    if match:
+                        val = int(match.group(1)) / 100.0
+                        self.progress_bar.set(val)
+                    # If the line is ONLY a progress marker (possibly with whitespace), don't print it
+                    if re.fullmatch(r'\s*PROG:\d+\s*', text):
+                        return
+                except:
+                    pass
 
             self.log_textbox.configure(state="normal")
-            self.log_textbox.insert("end", text)
+            
+            # Clean up text: replace \r\n with \n, or handle \r if needed
+            clean_text = text.replace('\r', '')
+            
+            # Determine tag based on content
+            tag = None
+            if "✅" in clean_text: tag = "success"
+            elif "❌" in clean_text or "🛑" in clean_text: tag = "error"
+            elif "⚠️" in clean_text: tag = "warning"
+            elif "🚀" in clean_text or "🔍" in clean_text: tag = "info"
+            
+            self.log_textbox.insert("end", clean_text, tag)
             self.log_textbox.configure(state="disabled")
             self.log_textbox.see("end")
         self.after(0, _append)
@@ -448,11 +463,10 @@ class SpotifyToolkitApp(ctk.CTk):
         self.current_view = "clean"
         self.set_active_nav("clean")
         self.clear_content_frame()
-        self.content_frame.grid_columnconfigure((0, 1), weight=1)
-        ctk.CTkLabel(self.content_frame, text=T['clean_title'], font=self.font_title).grid(row=0, column=0, columnspan=2, pady=(0, 20), sticky="w")
-        
-        self.add_tool_card(T['btn_delete_duplicates'], T['desc_delete_duplicates'], "delete_duplicates/delete_duplicates.py", 1, 0)
-        self.add_tool_card(T['btn_smart_shuffle'], T['desc_smart_shuffle'], "smart_shuffle/smart_shuffle.py", 1, 1)
+        ctk.CTkLabel(self.content_frame, text=T['clean_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        self.add_tool_button(T['btn_delete_duplicates'], T['desc_delete_duplicates'], "delete_duplicates/delete_duplicates.py", 1)
+        self.add_tool_button(T['btn_smart_shuffle'], T['desc_smart_shuffle'], "smart_shuffle/smart_shuffle.py", 2)
+        self.add_tool_button(T['btn_dead_tracks'], T['desc_dead_tracks'], "dead_tracks_detector/dead_tracks_detector.py", 3)
 
     def show_organize(self):
         self.current_view = "organize"
@@ -486,12 +500,11 @@ class SpotifyToolkitApp(ctk.CTk):
         self.current_view = "stats"
         self.set_active_nav("stats")
         self.clear_content_frame()
-        self.content_frame.grid_columnconfigure((0, 1), weight=1)
-        ctk.CTkLabel(self.content_frame, text=T['stats_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, columnspan=2, pady=(0, 20), sticky="w")
-        
-        self.add_tool_card(T['btn_top_tracks'], T['desc_top_tracks'], "top_tracks_generator/top_tracks_generator.py", 1, 0)
-        self.add_tool_card(T['btn_trend_reports'], T['desc_trend_reports'], "trend_reports/trend_reports.py", 1, 1)
-        self.add_tool_card(T['btn_mood_mixer'], T['desc_mood_mixer'], "mood_mixer/mood_mixer.py", 2, 0)
+        ctk.CTkLabel(self.content_frame, text=T['stats_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        self.add_tool_button(T['btn_top_tracks'], T['desc_top_tracks'], "top_tracks_generator/top_tracks_generator.py", 1)
+        self.add_tool_button(T['btn_trend_reports'], T['desc_trend_reports'], "trend_reports/trend_reports.py", 2)
+        self.add_tool_button(T['btn_mood_mixer'], T['desc_mood_mixer'], "mood_mixer/mood_mixer.py", 3)
+        self.add_tool_button(T['btn_discovery_engine'], T['desc_discovery_engine'], "discovery_engine/discovery_engine.py", 4)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2 and sys.argv[1] == "--run":

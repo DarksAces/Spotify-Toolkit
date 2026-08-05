@@ -1,7 +1,6 @@
 import sys
 import os
 import locale
-from tqdm import tqdm
 
 def get_export_dir():
     """
@@ -133,37 +132,34 @@ def select_playlist(sp, prompt="Elige una playlist:", include_liked=False):
                     print(f"{original_idx}: {name} ({total_tracks} {HT['tracks_count']})")
                 print(HT['write_exact'])
 
-def get_all_tracks(sp, mode, playlist_id=None):
+def get_all_tracks(sp, mode, playlist_id=None, market=None):
     """Obtiene todas las canciones de una playlist o de 'Liked Songs' con reporte de progreso."""
     tracks = []
     try:
         if mode == "liked_songs":
             desc = HT['getting_liked']
-            results = sp.current_user_saved_tracks(limit=50)
+            print(desc)
+            results = sp.current_user_saved_tracks(limit=50, market=market)
             total = results.get('total', 0)
         else:
             desc = HT['getting_playlist']
-            results = sp.playlist_tracks(playlist_id)
+            print(desc)
+            results = sp.playlist_tracks(playlist_id, market=market)
             total = results.get('total', 0)
         
         fetched = 0
-        with tqdm(total=total, desc=desc, unit="track", leave=False) as pbar:
-            while results:
-                items = results.get('items', [])
-                tracks.extend(items)
-                fetched += len(items)
-                pbar.update(len(items))
-                
-                # Reportar progreso para la GUI
-                if total > 0:
-                    percent = int((fetched / total) * 100)
-                    # Usamos print normal para tqdm y sys.stderr para la GUI si es necesario?
-                    # No, la GUI lee stdout. Tqdm escribe en stderr por defecto.
-                    # Vamos a imprimir el progreso para la GUI en stdout.
-                    print(f"PROG:{percent}")
-                    sys.stdout.flush()
+        while results:
+            items = results.get('items', [])
+            tracks.extend(items)
+            fetched += len(items)
+            
+            # Reportar progreso
+            if total > 0:
+                percent = int((fetched / total) * 100)
+                print(f"PROG:{percent}")
+                sys.stdout.flush()
 
-                results = sp.next(results) if results.get('next') else None
+            results = sp.next(results) if results.get('next') else None
     except Exception as e:
         print(f"⚠️ Error al obtener canciones: {e}")
     
