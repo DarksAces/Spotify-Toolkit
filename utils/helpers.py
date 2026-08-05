@@ -137,11 +137,13 @@ def get_all_tracks(sp, mode, playlist_id=None, market=None):
     tracks = []
     try:
         if mode == "liked_songs":
-            print(HT['getting_liked'])
+            desc = HT['getting_liked']
+            print(desc)
             results = sp.current_user_saved_tracks(limit=50, market=market)
             total = results.get('total', 0)
         else:
-            print(HT['getting_playlist'])
+            desc = HT['getting_playlist']
+            print(desc)
             results = sp.playlist_tracks(playlist_id, market=market)
             total = results.get('total', 0)
         

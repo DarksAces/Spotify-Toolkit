@@ -225,13 +225,20 @@ class SpotifyToolkitApp(ctk.CTk):
         self.utils_button = make_nav_btn("  🛠️  " + T['sidebar_utils'], self.show_utils, 4)
         self.stats_button = make_nav_btn("  📊  " + T['sidebar_stats'], self.show_stats, 5)
 
+        # Language Toggle Button
+        self.lang_btn = ctk.CTkButton(self.sidebar_frame, text="🌐 EN / ES", command=self.toggle_language,
+                                      fg_color="transparent", text_color=self.subtext_color,
+                                      hover_color="#282828", font=ctk.CTkFont(size=11), height=30)
+        self.lang_btn.grid(row=6, column=0, padx=10, pady=(0, 5), sticky="s")
+
         # Logout Button at the bottom
         self.logout_btn = ctk.CTkButton(self.sidebar_frame, text="  🚪  " + T['btn_logout'], command=self.logout,
-                                      fg_color="transparent", text_color="#FF4B4B", # Reddish for logout
+                                      fg_color="transparent", text_color="#FF4B4B",
                                       hover_color="#282828", font=self.font_sidebar, height=45, corner_radius=8)
-        self.logout_btn.grid(row=6, column=0, padx=10, pady=(20, 20), sticky="s")
-        self.sidebar_frame.grid_rowconfigure(6, weight=0) # Specific row for logout
-        self.sidebar_frame.grid_rowconfigure(5, weight=1) # Push everything up
+        self.logout_btn.grid(row=7, column=0, padx=10, pady=(0, 20), sticky="s")
+        self.sidebar_frame.grid_rowconfigure(7, weight=0)
+        self.sidebar_frame.grid_rowconfigure(6, weight=0)
+        self.sidebar_frame.grid_rowconfigure(5, weight=1)
 
         # Main Container
         self.main_frame = ctk.CTkFrame(self, fg_color=self.bg_color)
@@ -283,6 +290,24 @@ class SpotifyToolkitApp(ctk.CTk):
             self.add_log(T['no_creds'])
 
         self.show_home()
+
+    def toggle_language(self):
+        global LANG, T
+        LANG = 'en' if LANG == 'es' else 'es'
+        T = TEXTS[LANG]
+        self.title(T['title'])
+        # Refresh sidebar nav button labels
+        self.home_button.configure(text="  🏠  " + T['sidebar_home'])
+        self.clean_button.configure(text="  ✨  " + T['sidebar_clean'])
+        self.organize_button.configure(text="  📁  " + T['sidebar_organize'])
+        self.utils_button.configure(text="  🛠️  " + T['sidebar_utils'])
+        self.stats_button.configure(text="  📊  " + T['sidebar_stats'])
+        self.logout_btn.configure(text="  🚪  " + T['btn_logout'])
+        # Refresh current view
+        if hasattr(self, 'current_view'):
+            getattr(self, f"show_{self.current_view}")()
+        else:
+            self.show_home()
 
     def logout(self):
         try:
