@@ -12,7 +12,8 @@ from PIL import Image
 from dotenv import load_dotenv
 import tqdm
 import spotipy
-import spotipy.util as util
+
+from utils.progress_line import is_blank_console_line, parse_progress_line
 
 # --- CORRECCIÓN DE CODIFICACIÓN PARA EMOJIS EN WINDOWS ---
 if sys.stdout is not None and hasattr(sys.stdout, 'reconfigure'):
@@ -37,7 +38,6 @@ def get_resource_path(relative_path):
 # --- INTERNATIONALIZATION (i18n) ---
 def get_system_lang():
     try:
-        # En Python 3.11+, getdefaultlocale() está deprecado.
         lang = locale.getlocale()[0]
         if lang and lang.lower().startswith('es'):
             return 'es'
@@ -68,21 +68,21 @@ TEXTS = {
         'btn_dead_tracks': "Detectar Canciones Muertas",
         'desc_dead_tracks': "Busca canciones no disponibles por licencias.",
         'btn_separate_genres': "Separar por Géneros",
-        'desc_separate_genres': "Analiza una playlist y crea nuevas listas separadas por géneros musicales.",
+        'desc_separate_genres': "Crea listas separadas por géneros.",
         'btn_separate_artists': "Separar por Artistas",
-        'desc_separate_artists': "Crea playlists individuales para cada artista encontrado en una lista mixta.",
+        'desc_separate_artists': "Playlists individuales por artista.",
         'btn_reorder_tracks': "Mover Artista al Final",
-        'desc_reorder_tracks': "Mueve todas las canciones de un artista específico al final de la playlist.",
+        'desc_reorder_tracks': "Mueve un artista específico al final.",
         'btn_trend_reports': "Informe de Tendencias",
-        'desc_trend_reports': "Genera un informe detallado de tus géneros más escuchados.",
+        'desc_trend_reports': "Informe de tus géneros más escuchados.",
         'btn_artist_extractor': "Extraer Artistas",
-        'desc_artist_extractor': "Genera una lista de todos los artistas presentes en una de tus playlists.",
+        'desc_artist_extractor': "Lista de artistas en una playlist.",
         'btn_playlist_time': "Duración Playlist",
-        'desc_playlist_time': "Calcula el tiempo total exacto de reproducción de cualquier playlist.",
+        'desc_playlist_time': "Calcula el tiempo total exacto.",
         'btn_top_tracks': "Top Canciones",
-        'desc_top_tracks': "Genera una lista con tus canciones más escuchadas en diferentes periodos.",
+        'desc_top_tracks': "Tus canciones más escuchadas.",
         'btn_smart_shuffle': "Smart Shuffle",
-        'desc_smart_shuffle': "Mezcla tus listas evitando que suenen dos canciones seguidas del mismo artista.",
+        'desc_smart_shuffle': "Mezcla evitando artistas seguidos.",
         'btn_metadata_export': "Exportar Metadatos",
         'desc_metadata_export': "Exporta una playlist a CSV o JSON para usar en otras plataformas.",
         'btn_playlist_merger': "Fusionar Playlists",
@@ -125,21 +125,21 @@ TEXTS = {
         'btn_dead_tracks': "Dead Tracks Detector",
         'desc_dead_tracks': "Find tracks unavailable due to licensing.",
         'btn_separate_genres': "Separate by Genres",
-        'desc_separate_genres': "Analyze a playlist and create new lists separated by musical genres.",
+        'desc_separate_genres': "Create separate lists by genre.",
         'btn_separate_artists': "Separate by Artists",
-        'desc_separate_artists': "Create individual playlists for each artist found in a mixed list.",
+        'desc_separate_artists': "Individual playlists per artist.",
         'btn_reorder_tracks': "Move Artist to End",
-        'desc_reorder_tracks': "Move all songs by a specific artist to the end of the playlist.",
+        'desc_reorder_tracks': "Move specific artist to the end.",
         'btn_trend_reports': "Trend Reports",
-        'desc_trend_reports': "Generate a detailed report of your most listened genres.",
+        'desc_trend_reports': "Report of your top genres.",
         'btn_artist_extractor': "Extract Artists",
-        'desc_artist_extractor': "Generate a list of all artists present in one of your playlists.",
+        'desc_artist_extractor': "List of artists in a playlist.",
         'btn_playlist_time': "Playlist Duration",
-        'desc_playlist_time': "Calculate the exact total playback time of any playlist.",
+        'desc_playlist_time': "Calculate exact playback time.",
         'btn_top_tracks': "Top Tracks",
-        'desc_top_tracks': "Generate a list of your most listened tracks over different periods.",
+        'desc_top_tracks': "Your most listened tracks.",
         'btn_smart_shuffle': "Smart Shuffle",
-        'desc_smart_shuffle': "Shuffle your lists while avoiding two songs from the same artist in a row.",
+        'desc_smart_shuffle': "Shuffle avoiding repeated artists.",
         'btn_metadata_export': "Export Metadata",
         'desc_metadata_export': "Export a playlist to CSV or JSON for use on other platforms.",
         'btn_playlist_merger': "Playlist Merger",
@@ -173,7 +173,6 @@ def check_credentials():
     return all([os.getenv('SPOTIFY_CLIENT_ID'), os.getenv('SPOTIFY_CLIENT_SECRET'), os.getenv('SPOTIFY_REDIRECT_URI')])
 
 ctk.set_appearance_mode("dark")
-ctk.set_default_color_theme("green")
 
 class SpotifyToolkitApp(ctk.CTk):
     def __init__(self):
@@ -205,25 +204,44 @@ class SpotifyToolkitApp(ctk.CTk):
         # Sidebar
         self.sidebar_frame = ctk.CTkFrame(self, width=220, corner_radius=0, fg_color=self.sidebar_color)
         self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
-        self.sidebar_frame.grid_rowconfigure(5, weight=1)
+        self.sidebar_frame.grid_rowconfigure(6, weight=1)
 
         self.logo_label = ctk.CTkLabel(self.sidebar_frame, text="Toolkit", font=ctk.CTkFont(size=26, weight="bold"), text_color=self.text_color)
         self.logo_label.grid(row=0, column=0, padx=25, pady=(40, 30), sticky="w")
 
         # Utility to create buttons with consistent spacing
-        def make_nav_btn(text, cmd, row):
-            btn = ctk.CTkButton(self.sidebar_frame, text=text, command=cmd, 
+        self.nav_buttons = {}
+        self.nav_indicators = {}
+        def make_nav_btn(text, cmd, row, key):
+            # Container for button + indicator
+            container = ctk.CTkFrame(self.sidebar_frame, fg_color="transparent")
+            container.grid(row=row, column=0, padx=0, pady=2, sticky="ew")
+            container.grid_columnconfigure(1, weight=1)
+
+            # Indicator (the green vertical bar)
+            indicator = ctk.CTkFrame(container, width=4, height=28, fg_color="transparent", corner_radius=2)
+            indicator.grid(row=0, column=0, padx=(0, 5), sticky="w")
+            self.nav_indicators[key] = indicator
+
+            btn = ctk.CTkButton(container, text=text, command=cmd, 
                                 fg_color="transparent", text_color=self.subtext_color, 
                                 hover_color="#282828", anchor="w", 
                                 font=self.font_sidebar, height=45, corner_radius=8)
-            btn.grid(row=row, column=0, padx=10, pady=2, sticky="ew")
+            btn.grid(row=0, column=1, padx=(0, 10), sticky="ew")
+            self.nav_buttons[key] = btn
             return btn
 
-        self.home_button = make_nav_btn("  🏠  " + T['sidebar_home'], self.show_home, 1)
-        self.clean_button = make_nav_btn("  ✨  " + T['sidebar_clean'], self.show_clean, 2)
-        self.organize_button = make_nav_btn("  📁  " + T['sidebar_organize'], self.show_organize, 3)
-        self.utils_button = make_nav_btn("  🛠️  " + T['sidebar_utils'], self.show_utils, 4)
-        self.stats_button = make_nav_btn("  📊  " + T['sidebar_stats'], self.show_stats, 5)
+        self.home_button = make_nav_btn("  🏠  " + T['sidebar_home'], self.show_home, 1, "home")
+        self.clean_button = make_nav_btn("  ✨  " + T['sidebar_clean'], self.show_clean, 2, "clean")
+        self.organize_button = make_nav_btn("  📁  " + T['sidebar_organize'], self.show_organize, 3, "organize")
+        self.utils_button = make_nav_btn("  🔧  " + T['sidebar_utils'], self.show_utils, 4, "utils")
+        self.stats_button = make_nav_btn("  📊  " + T['sidebar_stats'], self.show_stats, 5, "stats")
+
+        # Language Toggle at the bottom
+        self.lang_btn = ctk.CTkButton(self.sidebar_frame, text="🌐 EN / ES", command=self.toggle_language,
+                                      fg_color="transparent", text_color=self.subtext_color,
+                                      hover_color="#282828", font=ctk.CTkFont(size=11), height=30)
+        self.lang_btn.grid(row=6, column=0, padx=10, pady=20, sticky="s")
 
         # Language Toggle Button
         self.lang_btn = ctk.CTkButton(self.sidebar_frame, text="🌐 EN / ES", command=self.toggle_language,
@@ -273,7 +291,7 @@ class SpotifyToolkitApp(ctk.CTk):
         self.command_entry.grid(row=0, column=0, sticky="ew", padx=(0, 10))
         self.command_entry.bind("<Return>", lambda e: self.send_input_to_script())
 
-        # Progress Bar
+        # Progress Bar (Now inside a hidden/visible container if needed, but we'll keep it always visible for now)
         self.progress_bar = ctk.CTkProgressBar(self.log_container, height=6, corner_radius=3, progress_color=self.accent_color, fg_color="#333333")
         self.progress_bar.grid(row=2, column=0, padx=15, pady=(0, 15), sticky="ew")
         self.progress_bar.set(0)
@@ -396,34 +414,25 @@ class SpotifyToolkitApp(ctk.CTk):
                 env['PYTHONIOENCODING'] = 'utf-8'
                 env['PYTHONUNBUFFERED'] = "1"
 
-                # Determinamos el comando de ejecución correctamente
                 if hasattr(sys, '_MEIPASS'):
-                    # Si es el ejecutable compilado
                     cmd = [sys.executable, "--run", abs_script_path]
                 else:
-                    # Si se ejecuta desde el código fuente
                     cmd = [sys.executable, sys.argv[0], "--run", abs_script_path]
 
                 self.current_process = subprocess.Popen(
-                    cmd,
-                    env=env,
-                    stdin=subprocess.PIPE,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    text=True,
-                    encoding='utf-8',
-                    errors='replace',
-                    bufsize=0,
+                    cmd, env=env, stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                    text=True, encoding='utf-8', errors='replace', bufsize=0,
                     creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
                 )
 
                 while True:
-                    char = self.current_process.stdout.read(1)
-                    if not char:
+                    line = self.current_process.stdout.readline()
+                    if not line:
                         if self.current_process.poll() is not None:
                             break
                         continue
-                    self.add_log_raw(char)
+                    self.add_log_raw(line)
                 
                 self.current_process.wait()
 
@@ -442,28 +451,42 @@ class SpotifyToolkitApp(ctk.CTk):
             widget.destroy()
 
     def show_home(self):
+        self.current_view = "home"
+        self.set_active_nav("home")
         self.clear_content_frame()
         ctk.CTkLabel(self.content_frame, text=T['welcome_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 10), sticky="w")
         ctk.CTkLabel(self.content_frame, text=T['welcome_desc'], font=self.font_subtitle, text_color=self.subtext_color).grid(row=1, column=0, sticky="nw")
 
-    def add_tool_button(self, name, desc, path, row):
-        # Card container for the tool
-        card = ctk.CTkFrame(self.content_frame, fg_color=self.card_color, corner_radius=10)
-        card.grid(row=row, column=0, pady=5, sticky="ew")
+    def add_tool_card(self, name, desc, path, row, col):
+        # Card Container
+        card = ctk.CTkFrame(self.content_frame, fg_color=self.card_color, corner_radius=12, border_width=1, border_color="#2A2A2A")
+        card.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
         card.grid_columnconfigure(0, weight=1)
 
-        lbl_frame = ctk.CTkFrame(card, fg_color="transparent")
-        lbl_frame.grid(row=0, column=0, padx=20, pady=15, sticky="w")
+        # Title
+        title_lbl = ctk.CTkLabel(card, text=name, font=self.font_subtitle, text_color=self.accent_color, anchor="w")
+        title_lbl.grid(row=0, column=0, padx=15, pady=(15, 5), sticky="w")
 
-        ctk.CTkLabel(lbl_frame, text=name, font=self.font_subtitle, text_color=self.text_color).pack(anchor="w")
-        ctk.CTkLabel(lbl_frame, text=desc, font=self.font_desc, text_color=self.subtext_color).pack(anchor="w")
+        # Description
+        desc_lbl = ctk.CTkLabel(card, text=desc, font=self.font_desc, text_color=self.subtext_color, wraplength=280, justify="left", anchor="nw")
+        desc_lbl.grid(row=1, column=0, padx=15, pady=(0, 15), sticky="nw")
 
-        btn = ctk.CTkButton(card, text="RUN", width=80, height=32, corner_radius=16, 
-                            fg_color="#333333", hover_color="#444444", text_color=self.text_color,
-                            command=lambda p=path: self.run_script_thread(p), font=ctk.CTkFont(weight="bold"))
-        btn.grid(row=0, column=1, padx=20, pady=15)
+        # Button
+        btn = ctk.CTkButton(card, text=T['btn_send'] if LANG == 'en' else "Lanzar", height=32, 
+                            fg_color="#282828", hover_color="#3E3E3E", 
+                            font=ctk.CTkFont(size=12, weight="bold"),
+                            command=lambda: self.run_script_thread(path))
+        btn.grid(row=2, column=0, padx=15, pady=(0, 15), sticky="ew")
+        
+        # Hover effect (Visual only)
+        def on_enter(e): card.configure(border_color=self.accent_color)
+        def on_leave(e): card.configure(border_color="#2A2A2A")
+        card.bind("<Enter>", on_enter)
+        card.bind("<Leave>", on_leave)
 
     def show_clean(self):
+        self.current_view = "clean"
+        self.set_active_nav("clean")
         self.clear_content_frame()
         ctk.CTkLabel(self.content_frame, text=T['clean_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
         self.add_tool_button(T['btn_delete_duplicates'], T['desc_delete_duplicates'], "delete_duplicates/delete_duplicates.py", 1)
@@ -471,18 +494,22 @@ class SpotifyToolkitApp(ctk.CTk):
         self.add_tool_button(T['btn_dead_tracks'], T['desc_dead_tracks'], "dead_tracks_detector/dead_tracks_detector.py", 3)
 
     def show_organize(self):
+        self.current_view = "organize"
+        self.set_active_nav("organize")
         self.clear_content_frame()
-        ctk.CTkLabel(self.content_frame, text=T['organize_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
-        tools = [
-            (T['btn_separate_genres'], T['desc_separate_genres'], "separate_genres/separate_genres.py"),
-            (T['btn_separate_artists'], T['desc_separate_artists'], "separate_artists/separate_artists.py")
-        ]
-        for i, (name, desc, path) in enumerate(tools):
-            self.add_tool_button(name, desc, path, i+1)
+        self.content_frame.grid_columnconfigure((0, 1), weight=1)
+        ctk.CTkLabel(self.content_frame, text=T['organize_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, columnspan=2, pady=(0, 20), sticky="w")
+        
+        self.add_tool_card(T['btn_separate_genres'], T['desc_separate_genres'], "separate_genres/separate_genres.py", 1, 0)
+        self.add_tool_card(T['btn_separate_artists'], T['desc_separate_artists'], "separate_artists/separate_artists.py", 1, 1)
 
     def show_utils(self):
+        self.current_view = "utils"
+        self.set_active_nav("utils")
         self.clear_content_frame()
-        ctk.CTkLabel(self.content_frame, text=T['utils_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
+        self.content_frame.grid_columnconfigure((0, 1), weight=1)
+        ctk.CTkLabel(self.content_frame, text=T['utils_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, columnspan=2, pady=(0, 20), sticky="w")
+        
         tools = [
             (T['btn_metadata_export'], T['desc_metadata_export'], "metadata_export/metadata_export.py"),
             (T['btn_library_backup'], T['desc_library_backup'], "library_backup/library_backup.py"),
@@ -492,9 +519,11 @@ class SpotifyToolkitApp(ctk.CTk):
             (T['btn_reorder_tracks'], T['desc_reorder_tracks'], "reorder_tracks/reorder_tracks.py")
         ]
         for i, (name, desc, path) in enumerate(tools):
-            self.add_tool_button(name, desc, path, i+1)
+            self.add_tool_card(name, desc, path, (i // 2) + 1, i % 2)
 
     def show_stats(self):
+        self.current_view = "stats"
+        self.set_active_nav("stats")
         self.clear_content_frame()
         ctk.CTkLabel(self.content_frame, text=T['stats_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
         self.add_tool_button(T['btn_top_tracks'], T['desc_top_tracks'], "top_tracks_generator/top_tracks_generator.py", 1)

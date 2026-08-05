@@ -18,7 +18,7 @@ a = Analysis(
         ('metadata_export', 'metadata_export'),
         ('utils', 'utils')
     ],
-    hiddenimports=['spotipy', 'customtkinter', 'difflib'],
+    hiddenimports=['spotipy', 'customtkinter', 'difflib', 'tqdm'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

@@ -5,6 +5,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from requests.exceptions import ReadTimeout
 from spotipy.exceptions import SpotifyException
+from tqdm import tqdm
 
 # --- CONFIGURACIÓN Y AUTENTICACIÓN ---
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -34,15 +35,17 @@ def get_common_genres(tracks):
     artist_ids_list = list(artist_ids)
     
     print(f"📦 Analizando géneros de {len(artist_ids_list)} artistas...")
-    for i in range(0, len(artist_ids_list), 50):
-        batch = artist_ids_list[i:i+50]
-        try:
-            artists_data = sp.artists(batch)['artists']
-            for artist in artists_data:
-                if artist:
-                    for g in artist['genres']:
-                        genre_counts[g] = genre_counts.get(g, 0) + 1
-        except: continue
+    with tqdm(total=len(artist_ids_list), desc="Analizando artistas", unit="artist") as pbar:
+        for i in range(0, len(artist_ids_list), 50):
+            batch = artist_ids_list[i:i+50]
+            try:
+                artists_data = sp.artists(batch)['artists']
+                for artist in artists_data:
+                    if artist:
+                        for g in artist['genres']:
+                            genre_counts[g] = genre_counts.get(g, 0) + 1
+                pbar.update(len(batch))
+            except: continue
             
     sorted_genres = sorted(genre_counts.items(), key=lambda x: x[1], reverse=True)
     return sorted_genres[:15]
@@ -57,21 +60,23 @@ def classify_tracks_by_genre(tracks, genres_to_classify):
     artist_genres = {}
     artist_ids_list = list(artist_ids)
     
-    for i in range(0, len(artist_ids_list), 50):
-        batch = artist_ids_list[i:i+50]
-        while True:
-            try:
-                artists_data = sp.artists(batch)['artists']
-                for artist in artists_data:
-                    if artist:
-                        artist_genres[artist['id']] = [g.lower() for g in artist['genres']]
-                break
-            except ReadTimeout:
-                time.sleep(5)
-            except SpotifyException as e:
-                if e.http_status == 429:
-                    time.sleep(int(e.headers.get('Retry-After', 1)))
-                else: raise e
+    with tqdm(total=len(artist_ids_list), desc="Clasificando artistas", unit="artist") as pbar:
+        for i in range(0, len(artist_ids_list), 50):
+            batch = artist_ids_list[i:i+50]
+            while True:
+                try:
+                    artists_data = sp.artists(batch)['artists']
+                    for artist in artists_data:
+                        if artist:
+                            artist_genres[artist['id']] = [g.lower() for g in artist['genres']]
+                    pbar.update(len(batch))
+                    break
+                except ReadTimeout:
+                    time.sleep(5)
+                except SpotifyException as e:
+                    if e.http_status == 429:
+                        time.sleep(int(e.headers.get('Retry-After', 1)))
+                    else: raise e
 
     genre_dict = {genre: [] for genre in genres_to_classify}
     for item in tracks:
@@ -125,8 +130,11 @@ def main():
             name = f"{genre.capitalize()} Mix"
             print(f"🛠️ Creando playlist: {name}")
             new_pl = sp.user_playlist_create(user_id, name, public=False)
-            for i in range(0, len(unique_ids), 100):
-                sp.playlist_add_items(new_pl['id'], unique_ids[i:i+100])
+            with tqdm(total=len(unique_ids), desc=f"Añadiendo a {genre}", unit="track", leave=False) as pbar:
+                for i in range(0, len(unique_ids), 100):
+                    batch = unique_ids[i:i+100]
+                    sp.playlist_add_items(new_pl['id'], batch)
+                    pbar.update(len(batch))
         else:
             print(f"⚠️ Sin canciones para: {genre}")
 

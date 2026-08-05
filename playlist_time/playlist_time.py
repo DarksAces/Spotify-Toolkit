@@ -2,6 +2,7 @@ import os
 import sys
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from tqdm import tqdm
 
 # --- CONFIGURACIÓN Y AUTENTICACIÓN ---
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -24,18 +25,22 @@ def calculate_playlist_duration(playlist_id, name):
     total_duration_ms = 0
     track_count = 0
     offset = 0
+    # Obtenemos el total primero
+    res_info = sp.playlist_tracks(playlist_id, limit=1, fields="total")
+    total_tracks = res_info['total']
     
-    while True:
-        results = sp.playlist_tracks(playlist_id, offset=offset, fields="items.track(duration_ms),next")
-        items = results['items']
-        for item in items:
-            if item and item['track']:
-                total_duration_ms += item['track']['duration_ms']
-                track_count += 1
-        
-        if not results['next']: break
-        offset += len(items)
-        print(f"   ∟ Procesadas {track_count} canciones...")
+    with tqdm(total=total_tracks, desc="Calculando duración", unit="track") as pbar:
+        while offset < total_tracks:
+            results = sp.playlist_tracks(playlist_id, offset=offset, fields="items.track(duration_ms),next")
+            items = results['items']
+            for item in items:
+                if item and item['track']:
+                    total_duration_ms += item['track']['duration_ms']
+                    track_count += 1
+            
+            pbar.update(len(items))
+            if not results['next']: break
+            offset += len(items)
     
     return total_duration_ms, track_count
 
@@ -54,21 +59,24 @@ def main():
         try:
             if mode == "liked_songs":
                 results = sp.current_user_saved_tracks(limit=50)
+                total_tracks = results['total']
             else:
-                results = sp.playlist_tracks(pl_id, limit=50, fields="items.track(duration_ms),next")
+                results = sp.playlist_tracks(pl_id, limit=50, fields="total,items.track(duration_ms),next")
+                total_tracks = results['total']
             
-            while results:
-                items = results['items']
-                for item in items:
-                    if item and item['track']:
-                        total_duration_ms += item['track']['duration_ms']
-                        track_count += 1
-                
-                if results['next']:
-                    results = sp.next(results)
-                    print(f"   ∟ Procesadas {track_count} canciones...")
-                else:
-                    results = None
+            with tqdm(total=total_tracks, desc="Procesando tracks", unit="track") as pbar:
+                while results:
+                    items = results['items']
+                    for item in items:
+                        if item and item['track']:
+                            total_duration_ms += item['track']['duration_ms']
+                            track_count += 1
+                    
+                    pbar.update(len(items))
+                    if results['next']:
+                        results = sp.next(results)
+                    else:
+                        results = None
         except Exception as e:
             print(f"❌ Error al obtener canciones: {e}")
             continue
