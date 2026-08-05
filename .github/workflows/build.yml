@@ -2,7 +2,7 @@ name: Build Spotify Toolkit EXE
 
 on:
   push:
-    branches: [ Develop, main ]
+    branches: [ main ]
     tags:
       - 'v*'
   workflow_dispatch:
