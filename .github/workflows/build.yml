@@ -31,7 +31,6 @@ jobs:
       shell: pwsh
       env:
         SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
-        SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
         SPOTIFY_REDIRECT_URI: ${{ secrets.SPOTIFY_REDIRECT_URI }}
       run: |
         # Determinar archivo principal (soporte para ambos nombres)
@@ -39,9 +38,9 @@ jobs:
         if (!(Test-Path $sourceFile)) { $sourceFile = "main_gui.py" }
         Write-Host "Inyectando credenciales en: $sourceFile"
 
-        # Inyectar credenciales para Plug & Play
+        # Inject only client_id and redirect_uri — no secret needed with PKCE
         $content = Get-Content $sourceFile -Raw
-        $content = $content -replace 'load_dotenv\(\) # \[CREDENTIALS_MARKER\]', "os.environ['SPOTIFY_CLIENT_ID']='${env:SPOTIFY_CLIENT_ID}'; os.environ['SPOTIFY_CLIENT_SECRET']='${env:SPOTIFY_CLIENT_SECRET}'; os.environ['SPOTIFY_REDIRECT_URI']='${env:SPOTIFY_REDIRECT_URI}'"
+        $content = $content -replace 'load_dotenv\(\) # \[CREDENTIALS_MARKER\]', "os.environ['SPOTIFY_CLIENT_ID']='${env:SPOTIFY_CLIENT_ID}'; os.environ['SPOTIFY_REDIRECT_URI']='${env:SPOTIFY_REDIRECT_URI}'"
         Set-Content main_build.py $content
 
         # Lista de carpetas a incluir (soporta nombres viejos y nuevos)

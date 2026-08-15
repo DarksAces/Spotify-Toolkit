@@ -135,7 +135,7 @@ class TestGetAllTracks:
         result = get_all_tracks(mock_sp, "playlist", "pl_001")
         # conftest mock has 3 valid tracks with IDs
         assert len(result) == 3
-        mock_sp.playlist_tracks.assert_called_once_with("pl_001")
+        mock_sp.playlist_tracks.assert_called_once_with("pl_001", market=None)
 
     def test_fetches_liked_songs(self, mock_sp):
         """Liked Songs mode uses current_user_saved_tracks."""

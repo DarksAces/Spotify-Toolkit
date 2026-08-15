@@ -1,24 +1,13 @@
 import os
 import sys
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
-from tqdm import tqdm
-
-# --- CONFIGURACIÓN Y AUTENTICACIÓN ---
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(project_root)
+from utils.auth import get_spotify_client, SpotifyAuthError
+from utils.helpers import select_playlist, format_duration
 
 try:
-    from utils.auth import get_spotify_client
-    from utils.helpers import select_playlist, format_duration
     sp = get_spotify_client()
-except ImportError:
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-        client_id=os.getenv("SPOTIFY_CLIENT_ID"),
-        client_secret=os.getenv("SPOTIFY_CLIENT_SECRET"),
-        redirect_uri=os.getenv("SPOTIFY_REDIRECT_URI"),
-        scope='playlist-read-private playlist-read-collaborative'
-    ))
+except SpotifyAuthError as e:
+    print(f"❌ Auth error: {e}")
+    sys.exit(1)
 
 def calculate_playlist_duration(playlist_id, name):
     print(f"⌛ Calculando duración de '{name}'...")
