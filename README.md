@@ -67,15 +67,17 @@ A powerful, all-in-one GUI suite designed to manage, clean, and optimize your Sp
 
 ### Run from source:
 ```bash
-git clone [https://github.com/DarksAces/Spotify-Toolkit.git](https://github.com/DarksAces/Spotify-Toolkit.git)
+git clone https://github.com/DarksAces/Spotify-Toolkit.git
 cd Spotify-Toolkit
 pip install -r requirements.txt
-# Copy .env.example to .env and fill your credentials
+# Copy .env.example to .env and fill in your Client ID
 python main.py
 ```
+
 ## 🧠 Architecture / Arquitectura
 
-* **Secret Injection:** GitHub Actions (`build.yml`) injects API keys during compilation to ensure a **"Plug & Play"** experience for end-users without exposing sensitive credentials in the source code.
+* **Secure Auth (PKCE):** The app uses the **Authorization Code with PKCE** flow (no client secret required). Each user authorises their own Spotify account through the browser. Only the `SPOTIFY_CLIENT_ID` is distributed — it is not a secret and cannot be used alone to make API calls on behalf of another user.
+* **Token Cache:** The OAuth token is stored in the current user's OS application-data directory (`%APPDATA%\SpotifyToolkit\` on Windows), never in the project root or a shared location.
 * **Async Execution:** All tools run on **separate threads** using Python's `threading` module to prevent the GUI from freezing during long-running API operations.
 * **Standardized I/O:** A custom engine routes `stdout` directly to the UI's internal console and redirects user `stdin` via the integrated input bar.
 

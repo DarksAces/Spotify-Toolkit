@@ -31,10 +31,10 @@ from tests.conftest import make_track, make_playlist_item
 # Patch the Spotify client before importing the module under test so the
 # module-level ``sp = get_spotify_client()`` never runs for real.
 # ---------------------------------------------------------------------------
-with patch("utils.auth.spotipy.Spotify"), patch("utils.auth.SpotifyOAuth"), \
+with patch("spotipy.oauth2.SpotifyPKCE"), patch("spotipy.Spotify"), \
+     patch("spotipy.cache_handler.CacheFileHandler"), \
      patch.dict("os.environ", {
          "SPOTIFY_CLIENT_ID": "fake_id",
-         "SPOTIFY_CLIENT_SECRET": "fake_secret",
          "SPOTIFY_REDIRECT_URI": "http://localhost/cb",
      }):
     from metadata_export.metadata_export import flatten_track, export_to_csv, export_to_json

@@ -1,26 +1,13 @@
 import os
 import random
-import spotipy
-import sys
-from spotipy.oauth2 import SpotifyOAuth
-from tqdm import tqdm
-from difflib import SequenceMatcher
-
-# --- CONFIGURACIÓN Y AUTENTICACIÓN ---
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(project_root)
+from utils.auth import get_spotify_client, SpotifyAuthError
+from utils.helpers import select_playlist
 
 try:
-    from utils.auth import get_spotify_client
-    from utils.helpers import select_playlist
     sp = get_spotify_client()
-except ImportError:
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-        client_id=os.getenv("SPOTIFY_CLIENT_ID"),
-        client_secret=os.getenv("SPOTIFY_CLIENT_SECRET"),
-        redirect_uri=os.getenv("SPOTIFY_REDIRECT_URI"),
-        scope='user-library-read user-top-read playlist-read-private playlist-modify-public playlist-modify-private'
-    ))
+except SpotifyAuthError as e:
+    print(f"❌ Auth error: {e}")
+    sys.exit(1)
 
 def similar(a, b):
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()

@@ -1,26 +1,12 @@
 import os
-import spotipy
-import sys
-from spotipy.oauth2 import SpotifyOAuth
-from collections import Counter
-import time
-from tqdm import tqdm
-
-# --- CONFIGURACIÓN Y AUTENTICACIÓN ---
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(project_root)
+from utils.auth import get_spotify_client, SpotifyAuthError
+from utils.helpers import select_playlist, get_all_tracks
 
 try:
-    from utils.auth import get_spotify_client
-    from utils.helpers import select_playlist, get_all_tracks
     sp = get_spotify_client()
-except ImportError:
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-        client_id=os.getenv("SPOTIFY_CLIENT_ID"),
-        client_secret=os.getenv("SPOTIFY_CLIENT_SECRET"),
-        redirect_uri=os.getenv("SPOTIFY_REDIRECT_URI"),
-        scope='user-library-read playlist-read-private'
-    ))
+except SpotifyAuthError as e:
+    print(f"❌ Auth error: {e}")
+    sys.exit(1)
 
 def obtener_datos_artistas(tracks):
     """Extrae los nombres de los artistas de una lista de tracks."""

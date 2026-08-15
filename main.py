@@ -12,6 +12,7 @@ from PIL import Image
 from dotenv import load_dotenv
 import tqdm
 import spotipy
+from utils.auth import get_cache_path, SpotifyAuthError
 
 from utils.progress_line import is_blank_console_line, parse_progress_line
 
@@ -170,7 +171,8 @@ T = TEXTS[LANG]
 load_dotenv() # [CREDENTIALS_MARKER]
 
 def check_credentials():
-    return all([os.getenv('SPOTIFY_CLIENT_ID'), os.getenv('SPOTIFY_CLIENT_SECRET'), os.getenv('SPOTIFY_REDIRECT_URI')])
+    # PKCE flow only requires the client ID — no secret is needed.
+    return bool(os.getenv('SPOTIFY_CLIENT_ID', '').strip())
 
 ctk.set_appearance_mode("dark")
 
@@ -340,7 +342,8 @@ class SpotifyToolkitApp(ctk.CTk):
 
     def logout(self):
         try:
-            cache_path = os.path.join(os.getcwd(), ".cache")
+            # Token cache now lives in the OS app-data directory, not the project root.
+            cache_path = get_cache_path()
             if os.path.exists(cache_path):
                 os.remove(cache_path)
             self.add_log("👋 Cerrando sesión y reiniciando...")
@@ -499,10 +502,15 @@ class SpotifyToolkitApp(ctk.CTk):
         self.current_view = "clean"
         self.set_active_nav("clean")
         self.clear_content_frame()
-        ctk.CTkLabel(self.content_frame, text=T['clean_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
-        self.add_tool_button(T['btn_delete_duplicates'], T['desc_delete_duplicates'], "delete_duplicates/delete_duplicates.py", 1)
-        self.add_tool_button(T['btn_smart_shuffle'], T['desc_smart_shuffle'], "smart_shuffle/smart_shuffle.py", 2)
-        self.add_tool_button(T['btn_dead_tracks'], T['desc_dead_tracks'], "dead_tracks_detector/dead_tracks_detector.py", 3)
+        self.content_frame.grid_columnconfigure((0, 1), weight=1)
+        ctk.CTkLabel(self.content_frame, text=T['clean_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, columnspan=2, pady=(0, 20), sticky="w")
+        tools = [
+            (T['btn_delete_duplicates'], T['desc_delete_duplicates'], "delete_duplicates/delete_duplicates.py"),
+            (T['btn_smart_shuffle'],     T['desc_smart_shuffle'],     "smart_shuffle/smart_shuffle.py"),
+            (T['btn_dead_tracks'],       T['desc_dead_tracks'],       "dead_tracks_detector/dead_tracks_detector.py"),
+        ]
+        for i, (name, desc, path) in enumerate(tools):
+            self.add_tool_card(name, desc, path, (i // 2) + 1, i % 2)
 
     def show_organize(self):
         self.current_view = "organize"
@@ -510,9 +518,13 @@ class SpotifyToolkitApp(ctk.CTk):
         self.clear_content_frame()
         self.content_frame.grid_columnconfigure((0, 1), weight=1)
         ctk.CTkLabel(self.content_frame, text=T['organize_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, columnspan=2, pady=(0, 20), sticky="w")
-        
-        self.add_tool_card(T['btn_separate_genres'], T['desc_separate_genres'], "separate_genres/separate_genres.py", 1, 0)
-        self.add_tool_card(T['btn_separate_artists'], T['desc_separate_artists'], "separate_artists/separate_artists.py", 1, 1)
+        tools = [
+            (T['btn_separate_genres'],  T['desc_separate_genres'],  "separate_genres/separate_genres.py"),
+            (T['btn_separate_artists'], T['desc_separate_artists'], "separate_artists/separate_artists.py"),
+            (T['btn_reorder_tracks'],   T['desc_reorder_tracks'],   "reorder_tracks/reorder_tracks.py"),
+        ]
+        for i, (name, desc, path) in enumerate(tools):
+            self.add_tool_card(name, desc, path, (i // 2) + 1, i % 2)
 
     def show_utils(self):
         self.current_view = "utils"
@@ -520,14 +532,12 @@ class SpotifyToolkitApp(ctk.CTk):
         self.clear_content_frame()
         self.content_frame.grid_columnconfigure((0, 1), weight=1)
         ctk.CTkLabel(self.content_frame, text=T['utils_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, columnspan=2, pady=(0, 20), sticky="w")
-        
         tools = [
-            (T['btn_metadata_export'], T['desc_metadata_export'], "metadata_export/metadata_export.py"),
-            (T['btn_library_backup'], T['desc_library_backup'], "library_backup/library_backup.py"),
-            (T['btn_playlist_merger'], T['desc_playlist_merger'], "playlist_merger/playlist_merger.py"),
-            (T['btn_playlist_time'], T['desc_playlist_time'], "playlist_time/playlist_time.py"),
+            (T['btn_metadata_export'],  T['desc_metadata_export'],  "metadata_export/metadata_export.py"),
+            (T['btn_library_backup'],   T['desc_library_backup'],   "library_backup/library_backup.py"),
+            (T['btn_playlist_merger'],  T['desc_playlist_merger'],  "playlist_merger/playlist_merger.py"),
+            (T['btn_playlist_time'],    T['desc_playlist_time'],    "playlist_time/playlist_time.py"),
             (T['btn_artist_extractor'], T['desc_artist_extractor'], "artist_extractor/artist_extractor.py"),
-            (T['btn_reorder_tracks'], T['desc_reorder_tracks'], "reorder_tracks/reorder_tracks.py")
         ]
         for i, (name, desc, path) in enumerate(tools):
             self.add_tool_card(name, desc, path, (i // 2) + 1, i % 2)
@@ -536,11 +546,16 @@ class SpotifyToolkitApp(ctk.CTk):
         self.current_view = "stats"
         self.set_active_nav("stats")
         self.clear_content_frame()
-        ctk.CTkLabel(self.content_frame, text=T['stats_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, pady=(0, 20), sticky="w")
-        self.add_tool_button(T['btn_top_tracks'], T['desc_top_tracks'], "top_tracks_generator/top_tracks_generator.py", 1)
-        self.add_tool_button(T['btn_trend_reports'], T['desc_trend_reports'], "trend_reports/trend_reports.py", 2)
-        self.add_tool_button(T['btn_mood_mixer'], T['desc_mood_mixer'], "mood_mixer/mood_mixer.py", 3)
-        self.add_tool_button(T['btn_discovery_engine'], T['desc_discovery_engine'], "discovery_engine/discovery_engine.py", 4)
+        self.content_frame.grid_columnconfigure((0, 1), weight=1)
+        ctk.CTkLabel(self.content_frame, text=T['stats_title'], font=self.font_title, text_color=self.text_color).grid(row=0, column=0, columnspan=2, pady=(0, 20), sticky="w")
+        tools = [
+            (T['btn_top_tracks'],       T['desc_top_tracks'],       "top_tracks_generator/top_tracks_generator.py"),
+            (T['btn_trend_reports'],    T['desc_trend_reports'],    "trend_reports/trend_reports.py"),
+            (T['btn_mood_mixer'],       T['desc_mood_mixer'],       "mood_mixer/mood_mixer.py"),
+            (T['btn_discovery_engine'], T['desc_discovery_engine'], "discovery_engine/discovery_engine.py"),
+        ]
+        for i, (name, desc, path) in enumerate(tools):
+            self.add_tool_card(name, desc, path, (i // 2) + 1, i % 2)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2 and sys.argv[1] == "--run":

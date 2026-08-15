@@ -2,24 +2,14 @@ import os
 import sys
 import json
 import csv
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
-
-# --- CONFIGURACIÓN Y AUTENTICACIÓN ---
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(project_root)
+from utils.auth import get_spotify_client, SpotifyAuthError
+from utils.helpers import select_playlist, get_all_tracks, format_duration, get_export_dir
 
 try:
-    from utils.auth import get_spotify_client
-    from utils.helpers import select_playlist, get_all_tracks, format_duration, get_export_dir
     sp = get_spotify_client()
-except ImportError:
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-        client_id=os.getenv("SPOTIFY_CLIENT_ID"),
-        client_secret=os.getenv("SPOTIFY_CLIENT_SECRET"),
-        redirect_uri=os.getenv("SPOTIFY_REDIRECT_URI"),
-        scope='user-library-read playlist-read-private'
-    ))
+except SpotifyAuthError as e:
+    print(f"❌ Auth error: {e}")
+    sys.exit(1)
 
 import argparse
 
