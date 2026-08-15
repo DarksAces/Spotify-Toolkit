@@ -29,6 +29,7 @@ appropriately without the process being forcibly terminated.
 """
 
 import os
+from typing import Optional
 import sys
 import spotipy
 from spotipy.oauth2 import SpotifyPKCE
@@ -95,7 +96,7 @@ def get_cache_path() -> str:
     return _get_cache_path()
 
 
-def get_spotify_client(scope: str | None = None) -> spotipy.Spotify:
+def get_spotify_client(scope: Optional[str] = None) -> spotipy.Spotify:
     """
     Return an authenticated :class:`spotipy.Spotify` client.
 
